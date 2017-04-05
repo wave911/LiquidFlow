@@ -1,0 +1,15 @@
+Re=1
+R=1
+H=1
+n=10
+nz=3
+Tau=0.01
+Iterations=100
+SolverType=4
+MeshType=1
+MeshFile=/home/pvfj48/Projects/LiquidFlow/mesh/newNS_box_2.dat
+MeshGenType=221
+SingleMeshFilename=D:/Projects/Eclipse/VSLiquidFlow/MeshSubmarine/Mesh_1.dat
+MeshFolder=D:/Projects/Eclipse/VSLiquidFlow/Grid/MovingBrickCircle/
+StartMeshMask=.*_1.dat
+ResFilePerStep=1

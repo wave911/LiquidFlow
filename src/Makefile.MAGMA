@@ -1,0 +1,38 @@
+SRCS = Common.cpp Mesh.cpp LiquidFlow.cpp CommonSolver.cpp
+#SRCS = LiquidFlow.cpp Common.cpp Mesh.cpp Solver.cpp Coefficients.cpp FEMProblem.cpp
+
+RM = rm -f
+CC = g++
+PROG = liquidflow
+DEFINES = LIBMAGMASPARSE
+CFLAGS = -ggdb -std=c++0x
+INCS = 	 -I../include \
+		 -I../../math_libs/magma-2.0.2/include/ \
+		 -I../../math_libs/magma-2.0.2/testing/ \
+		 -I../../math_libs/magma-2.0.2/sparse-iter/include/ \
+		 -I${CUDADIR}/include/
+		 
+#LDFLAGS = -lm
+LIBS_DIRS = -L/usr/lib64 \
+			-L../lib \
+			-L../../math_libs/magma-2.0.2/lib
+LIBS =  -lrt -lm \
+	-l:liblapack.so.3 \
+	-l:libblas.so.3 \
+	-l:libmagma_sparse.so \
+	-l:libmagma.so
+	
+	
+OBJS = $(SRCS:.cpp=.o)
+
+all: ${PROG}
+
+%.o: %.cpp
+	$(CC) -D$(DEFINES) $(CFLAGS) -c $(INCS) $<
+
+${PROG}: ${OBJS}
+	$(CC) -D$(DEFINES) $(CFLAGS) $(LIBS_DIRS) $(OBJS) $(LIBS) -o $@
+	cp liquidflow ../bin/liquidflow
+clean:
+	${RM} ${PROG} ${OBJS}
+

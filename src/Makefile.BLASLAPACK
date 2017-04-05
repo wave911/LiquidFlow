@@ -1,0 +1,28 @@
+#SRCS = Common.cpp Mesh.cpp CommonSolver.cpp LiquidFlow.cpp
+SRCS = Common.cpp Mesh.cpp LiquidFlow.cpp
+
+RM = rm -f
+CC = g++
+PROG = liquidflow
+DEFINES = LIBBLASLAPACK
+CFLAGS = -ggdb -std=c++0x
+INCS = 	 -I../include
+#LDFLAGS = -lm
+LIBS_DIRS = -L/usr/lib64 -L../lib
+LIBS =  -lrt -lm \
+	-l:liblapack.so.3 -l:libblas.so.3 
+	
+
+OBJS = $(SRCS:.cpp=.o)
+
+all: ${PROG}
+
+%.o: %.cpp
+	$(CC) -D$(DEFINES) $(CFLAGS) -c $(INCS) $<
+
+${PROG}: ${OBJS}
+	$(CC) -D$(DEFINES) $(CFLAGS) $(LIBS_DIRS) $(OBJS) $(LIBS) -o $@
+	cp liquidflow ../bin/liquidflow
+clean:
+	${RM} ${PROG} ${OBJS}
+
