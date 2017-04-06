@@ -1,0 +1,26 @@
+#ifndef COMMON_H_
+#define COMMON_H_
+
+//#include "Mesh.h"
+//#include "Point.h"
+#include <ctype.h>
+#include <string>
+//#include <list>
+//#include <map>
+
+#define CFG_PLENGTH 256
+#define CONFIG_FILENAME "cfg.txt"
+
+class CConfigFileParser
+{
+	private:
+		std::string m_filename;
+	public:
+		CConfigFileParser(std::string filename);
+		virtual ~CConfigFileParser();
+
+		std::string getParameter(const char *pname);
+		
+};
+
+#endif //COMMON_H_

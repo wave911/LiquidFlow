@@ -1,8 +1,4 @@
 Re=1
-R=1
-H=1
-n=10
-nz=3
 Tau=0.01
 Iterations=100
 SolverType=4
