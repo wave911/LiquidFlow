@@ -8,7 +8,7 @@
 #ifndef POINT_H_
 #define POINT_H_
 
-#include "common_headers/real_type.h"
+#include "real_type.h"
 
 class CPoint3D
 {

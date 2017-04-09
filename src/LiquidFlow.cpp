@@ -31,6 +31,7 @@
 #include <time.h>
 #include <iostream>
 #include "Common.h"
+#include "Mesh.h"
 
 int main()
 {
@@ -46,5 +47,9 @@ int main()
 	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
 	MeshType = std::stoi(cfp.getParameter("^MeshType=(\\S+)"));
 
+	CMesh *mesh = new CSalomeMesh("../mesh/Mesh_box.dat");
+	mesh->Init();
+
+	delete (mesh);
 	return 0;
 }
