@@ -14,17 +14,17 @@ CSalomeMesh::CSalomeMesh(const std::string filename) : CMesh() {
 	m_filename = filename;
 	m_pointsNumber = 0;
 	m_elementsNumber = 0;
-	m_trianglesNumber = 0;
+	m_borderElementsNumber = 0;
 }
 
 CSalomeMesh::~CSalomeMesh() {
 	m_points.clear();
 	m_borderPoints.clear();
-	m_triangles.clear();
+	m_borderElements.clear();
 	m_mesh.clear();
 }
 
-int CSalomeMesh::Init() {
+int CSalomeMesh::Init(MeshGeometryType meshType) {
 	ifstream in_stream;
 	string line;
     in_stream.open(m_filename);
@@ -38,23 +38,40 @@ int CSalomeMesh::Init() {
     {
     	std::vector<std::string> tokens = split(line, " ");
     	if (idx++ < m_pointsNumber) {
-    		CPoint3D point = CPoint3D(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
+    		CPoint3D point;
+    		if (meshType == MeshGeometryType::G2D) {
+    			point = CPoint3D(stof(tokens[1]), stof(tokens[2]), 0);
+    		}
+    		if (meshType == MeshGeometryType::G3D) {
+    			point = CPoint3D(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
+    		}
     		m_points.push_back(point);
-    	}
-    	if (idx >= m_pointsNumber ) {
-	    	if (tokens[1].find_first_of("220", 0) == 0) {
-	    		addPoints(tokens, m_triangles);
+    	}    	
+    	if (idx > m_pointsNumber ) {
+    		if (meshType == MeshGeometryType::G3D) {
+		    	if (tokens[1].find("220", 0) != std::string::npos) {
+		    		addPoints(tokens, m_borderElements);
+		    	}
+		    	if (tokens[1].find("30",0) != std::string::npos) {
+		    		addPoints(tokens, m_mesh);
+		    	}    	
 	    	}
-	    	if (tokens[1].find_first_of("30", 0) == 0) {
-	    		addPoints(tokens, m_mesh);
-	    	}    	
+    		if (meshType == MeshGeometryType::G2D) {
+		    	if (tokens[1].find("10", 0) != std::string::npos) {
+		    		addPoints(tokens, m_borderElements);
+		    	}
+		    	if (tokens[1].find("20",0) != std::string::npos) {
+		    		addPoints(tokens, m_mesh);
+		    	}    	
+	    	}	    	
     	}
     }
     getBorderPoints();
 
     cout << m_mesh.size() << endl;
-    cout << m_triangles.size() << endl;
+    cout << m_borderElements.size() << endl;
     cout << m_borderPoints.size() << endl;
+    cout << m_points.size() << endl;
     in_stream.close();
 }
 
@@ -66,33 +83,41 @@ int CSalomeMesh::getElementsNumber() {
 	return m_mesh.size();
 }
 
-int CSalomeMesh::getTrianglesNumber() {
-	return m_triangles.size();
+int CSalomeMesh::getBorderElementsNumber() {
+	return m_borderElements.size();
 }
 
-std::list<CPoint3D> CSalomeMesh::getPoints() {
+std::vector<CPoint3D> CSalomeMesh::getPoints() {
 	return m_points;
 }
 
-std::map<int,std::list<int>> CSalomeMesh::getElements() {
+std::map<int,std::vector<int>> CSalomeMesh::getElements() {
 	return m_mesh;
 }
 
-void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::list<int>>& aMap) {
-	list<int> temp;
+std::vector<int> CSalomeMesh::getElementByIndex(const int idx) {
+	return m_mesh[idx];
+}
+
+CPoint3D CSalomeMesh::getPointByIndex(const int idx) {
+	return m_points[idx];
+}
+
+void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap) {
+	vector<int> temp;
 	for (int i = 2; i < tokens.size(); i++) { 
 		if (trim(tokens[i]).length() != 0) {
 			temp.push_back(stoi(tokens[i]));
 		}
 	}
-	int index = stoi(tokens[0]);
+	int index = aMap.size();
 	aMap[index] = temp;
 	temp.clear();
 }
 
 void CSalomeMesh::getBorderPoints() {
-	for (auto const& x : m_triangles) {
-		list<int> pts = x.second;
+	for (auto const& x : m_borderElements) {
+		vector<int> pts = x.second;
 		for (auto const& p: pts) {
 			m_borderPoints.insert(p);
 		}

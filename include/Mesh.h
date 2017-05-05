@@ -3,8 +3,9 @@
 
 #include "real_type.h"
 #include "Point.h"
+#include "Common.h"
 #include <string.h>
-#include <list>
+#include <vector>
 #include <map>
 #include <vector>
 #include <set>
@@ -15,23 +16,26 @@ class CMesh
 		CMesh() {};
 		virtual ~CMesh() {};
 
-		virtual int Init() = 0;
+		virtual int Init(MeshGeometryType meshType) = 0;
 		virtual int getPointsNumber() = 0;
 		virtual int getElementsNumber() = 0;
-		virtual int getTrianglesNumber() = 0;
-		virtual std::list<CPoint3D> getPoints() = 0;
-		virtual std::map<int,std::list<int>> getElements() = 0;
+		virtual int getBorderElementsNumber() = 0;
+		virtual std::vector<CPoint3D> getPoints() = 0;
+		virtual std::map<int,std::vector<int>> getElements() = 0;
+		virtual std::vector<int> getElementByIndex(const int idx) = 0;
+		virtual CPoint3D getPointByIndex(const int idx) = 0;
 };
 
-class CSalomeMesh : public CMesh {
+class CSalomeMesh : public CMesh 
+{
 	private:
-		std::list<CPoint3D> m_points;
+		std::vector<CPoint3D> m_points;
 		std::set<int> m_borderPoints;
-		std::map<int,std::list<int>> m_triangles;
-		std::map<int,std::list<int>> m_mesh;
+		std::map<int,std::vector<int>> m_borderElements;
+		std::map<int,std::vector<int>> m_mesh;
 		int m_pointsNumber;
 		int m_elementsNumber;
-		int m_trianglesNumber;
+		int m_borderElementsNumber;
 
 		std::string m_filename;
 	public:
@@ -39,16 +43,18 @@ class CSalomeMesh : public CMesh {
 		CSalomeMesh(const std::string filename);
 		virtual ~CSalomeMesh();
 
-		virtual int Init();
+		virtual int Init(MeshGeometryType meshType);
 		virtual int getPointsNumber();
 		virtual int getElementsNumber();
-		virtual int getTrianglesNumber();
-		virtual std::list<CPoint3D> getPoints();
-		virtual std::map<int,std::list<int>> getElements();
+		virtual int getBorderElementsNumber();
+		virtual std::vector<CPoint3D> getPoints();
+		virtual std::map<int,std::vector<int>> getElements();
+		virtual std::vector<int> getElementByIndex(const int idx);
+		virtual CPoint3D getPointByIndex(const int idx);		
 
 	private:
 		std::vector<std::string> split(const std::string& text, const std::string& delims);
-		void addPoints(std::vector<std::string>& tokens, std::map<int,std::list<int>>& aMap);
+		void addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap);
 		std::string trim(const std::string &s);
 		void getBorderPoints();
 

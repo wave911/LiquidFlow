@@ -1,5 +1,4 @@
-#SRCS = Common.cpp Mesh.cpp CommonSolver.cpp LiquidFlow.cpp
-SRCS = Common.cpp Mesh.cpp LiquidFlow.cpp 
+SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp 
 
 RM = rm -f
 CC = g++

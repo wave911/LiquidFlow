@@ -23,4 +23,6 @@ class CConfigFileParser
 		
 };
 
+enum class MeshGeometryType {G2D = 0, G3D = 1};
+
 #endif //COMMON_H_

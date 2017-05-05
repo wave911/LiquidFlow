@@ -32,6 +32,9 @@
 #include <iostream>
 #include "Common.h"
 #include "Mesh.h"
+#include "Fem.h"
+
+using namespace std;
 
 int main()
 {
@@ -47,9 +50,28 @@ int main()
 	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
 	MeshType = std::stoi(cfp.getParameter("^MeshType=(\\S+)"));
 
-	CMesh *mesh = new CSalomeMesh("../mesh/Mesh_box.dat");
-	mesh->Init();
+	//CMesh *mesh = new CSalomeMesh("../mesh/Mesh_box.dat");
+	CMesh *mesh = new CSalomeMesh("../mesh/Mesh_1_2D.dat");
+	mesh->Init(MeshGeometryType::G2D);
 
+	CFem *fem = new CFemLocalLinear2D(mesh);
+
+	//cout << "here1" << endl;
+	std::vector<int> elem = mesh->getElementByIndex(0);
+	//cout << "here2" << endl;
+	//vector<CPoint3D> pp = mesh->getPoints();
+	//cout << elem.size() << endl;
+	CPoint3D p = mesh->getPointByIndex(elem[0]);
+	//cout << "here3" << endl;
+	cout << p.m_x << " " << p.m_y << endl;
+	std::vector<real_t> ksi = fem->getLocalCoordinates(0, p);
+	cout << "here4" << endl;
+	cout << ksi[0] << endl;
+	cout << ksi[1] << endl;
+	cout << ksi[2] << endl;
+	//cout << ksi[3] << endl;
+
+	delete(fem);
 	delete (mesh);
 	return 0;
 }
