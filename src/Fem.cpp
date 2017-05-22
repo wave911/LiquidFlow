@@ -6,7 +6,6 @@ using namespace std;
 
 void CFem::dgemv(char *trans, int m, int n, real_t alpha, real_t *a, 
 				   int lda, real_t *x, int incx, real_t beta, real_t *y, int incy) {
-	//cout << *m << " " << *n << endl;
 #ifdef LIBBLASLAPACK
 	dgemv_(trans, (integer*)&m, (integer*)&n, (doublereal*)&alpha, 
 				(doublereal*)a, (integer*)&lda, (doublereal*)x, 
@@ -20,6 +19,18 @@ CFemLocalLinear2D::CFemLocalLinear2D(CMesh *mesh) {
 }
 
 CFemLocalLinear2D::~CFemLocalLinear2D() {
+	delete [] m_K;
+	delete [] m_C;
+	delete [] m_F;
+}
+
+void CFemLocalLinear2D::init(CProblem *pr) {
+	const int n = 3; //number of equations to solve
+	int count = m_mesh->getPointsNumber();
+	m_K = new real_t[count * n * count * n];
+	m_C = new real_t[count * n * count * n];
+	m_F = new real_t[count * n];
+	m_pr = pr;
 }
 
 std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element, 
@@ -142,20 +153,90 @@ real_t CFemLocalLinear2D::getdNdKsi(const int idxN, const int idxKsi) {
 		return 0;
 }
 
-void void CFemLocalLinear2D::assembleKMatrix() {
+real_t CFemLocalLinear2D::getdUdX(const int element, const int dim) {
+	std::vector<int> element = m_mesh->getElementByIndex(i);
+	real_t res = 0;
+	for (int i = 0; i < element.size(); i++) {
+		real_t U = m_pr->getU(element[i], dim);
+		res += U * getdNdX(i, element);
+	}
+
+	return res;
+}
+
+real_t CFemLocalLinear2D::getdUdY(const int element, const int dim) {
+	std::vector<int> element = m_mesh->getElementByIndex(i);
+	real_t res = 0;
+	for (int i = 0; i < element.size(); i++) {
+		real_t U = m_pr->getU(element[i], dim);
+		res += U * getdNdY(i, element);
+	}
+
+	return res;
+}
+
+real_t CFemLocalLinear2D::getdUdY(const int element) {
+
+}
+
+void CFemLocalLinear2D::assembleKMatrix() {
+	const int n = 3;
+	real_t cc = 0,
+		   kk = 0;
+
 	int elementsNum = m_mesh->getElementsNumber();
 	if (elementsNum > 0) {
 		for (int i = 0; i < elementsNum; i++) {
-			std::list<int> element = m_mesh->getElementByIndex(i);
-			for (int j = 0; j < element.size(); j++) {
-				for (int k = 0; k < element.size(); k++) {
+			std::vector<int> element = m_mesh->getElementByIndex(i);
+			for (int g_col = 0; g_col < element.size(); g_col++) {
+				for (int g_row = 0; g_row < element.size(); g_row++) {
+					int pivot = (m_mesh->getPointsNumber() * n * n) * g_col + n * g_row;
+					for (int l_col = 0; l_col < n; l_col++) {
+						for (int l_row = 0; l_row < n; l_row++) {
+							if (l_col == g_row) {
+								if (g_col == g_row)
+									cc = getSquare(i)/6;
+								else
+									cc = getSquare(i)/12;						
+								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
+								kk = kk * getSquare(i)/12;
+								//if (g_row < n)
 
+							} 
+							else {
+								if ((2 == l_col) && (0 == l_row))
+									kk = getdNdX(g_col, i) * getSquare(i)/3;
+								if ((2 == l_col) && (1 == l_row))
+									kk = getdNdY(g_col, i) * getSquare(i)/3;
+							}
+
+							int g_idx = pivot + l_col * m_mesh->getPointsNumber() * n + l_row;
+							m_K[g_idx] += kk + cc;
+							m_C[g_idx] += cc;
+						}
+					}
 				}
 			}
 		}
 	}
 }
 
+void CFemLocalLinear2D::assembleRightVector() {
+	const int n = 3;
+	real_t ff = 0;
+	int elnumber = m_mesh->getElementsNumber();
+
+	for (int i = 0; i < elnumber; i++) {
+		std::list<int> element = m_mesh->getElementByIndex(i);
+		for (int row = 0; row < element.size(); row++) {
+			real_t U1 = m_pr->getU(i, 0);	
+			real_t U2 = m_pr->getU(i, 1);
+			ff = U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0);
+
+		}
+	}
+
+}
 
 CFemLocalLinear3D::CFemLocalLinear3D(CMesh *mesh) {
 	m_mesh = mesh;
