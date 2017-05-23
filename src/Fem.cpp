@@ -175,10 +175,6 @@ real_t CFemLocalLinear2D::getdUdY(const int element, const int dim) {
 	return res;
 }
 
-real_t CFemLocalLinear2D::getdUdY(const int element) {
-
-}
-
 void CFemLocalLinear2D::assembleKMatrix() {
 	const int n = 3;
 	real_t cc = 0,
@@ -190,7 +186,7 @@ void CFemLocalLinear2D::assembleKMatrix() {
 			std::vector<int> element = m_mesh->getElementByIndex(i);
 			for (int g_col = 0; g_col < element.size(); g_col++) {
 				for (int g_row = 0; g_row < element.size(); g_row++) {
-					int pivot = (m_mesh->getPointsNumber() * n * n) * g_col + n * g_row;
+					int pivot = (m_mesh->getPointsNumber() * n * n) * element[g_col] + n * element[g_row];
 					for (int l_col = 0; l_col < n; l_col++) {
 						for (int l_row = 0; l_row < n; l_row++) {
 							if (l_col == g_row) {
@@ -200,7 +196,8 @@ void CFemLocalLinear2D::assembleKMatrix() {
 									cc = getSquare(i)/12;						
 								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
 								kk = kk * getSquare(i)/12;
-								//if (g_row < n)
+								if (g_row < n - 1)
+									kk = kk/m_pr->getRe();
 
 							} 
 							else {
@@ -211,7 +208,7 @@ void CFemLocalLinear2D::assembleKMatrix() {
 							}
 
 							int g_idx = pivot + l_col * m_mesh->getPointsNumber() * n + l_row;
-							m_K[g_idx] += kk + cc;
+							m_K[g_idx] += (kk + cc)/m_pr->getTau();
 							m_C[g_idx] += cc;
 						}
 					}
@@ -223,16 +220,45 @@ void CFemLocalLinear2D::assembleKMatrix() {
 
 void CFemLocalLinear2D::assembleRightVector() {
 	const int n = 3;
-	real_t ff = 0;
+	real_t ff1 = 0, ff2 = 0, ff3 = 0;
 	int elnumber = m_mesh->getElementsNumber();
+	int ptnumber = m_mesh->getPointsNumber();
 
 	for (int i = 0; i < elnumber; i++) {
 		std::list<int> element = m_mesh->getElementByIndex(i);
-		for (int row = 0; row < element.size(); row++) {
-			real_t U1 = m_pr->getU(i, 0);	
-			real_t U2 = m_pr->getU(i, 1);
-			ff = U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0);
+		for (int j = 0; j < element.size(); j++) {
+			if (!m_mesh->isBorderPoint(element[j])) {
+				real_t U1 = m_pr->getU(i, 0);
+				real_t U2 = m_pr->getU(i, 1);
+				m_F[element[j] * ptnumber + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0))/(this->getSquare(i) * 3);
+				m_F[element[j] * ptnumber + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1))/(this->getSquare(i) * 3);
+				m_F[element[j] * ptnumber + 2] += 0;
+			}
+			else {
+				m_F[element[j] * ptnumber + 0] = 1;
+				m_F[element[j] * ptnumber + 1] = 1;
+				m_F[element[j] * ptnumber + 2] = 1;
 
+				for (int k = 0; k < ptnumber; k++) {
+					for (int ii = 0; ii < n; ii++) {
+						for (int jj = 0; jj < n; jj++) {
+							int pivot = (ptnumber * n * n) * k + n * element[j];
+							int g_idx = pivot + jj * m_mesh->getPointsNumber() * n + ii;
+							if (k == element[j]) {
+								if (ii == jj) {
+									m_K[g_idx] = 1;
+								}
+								else
+									m_K[g_idx] = 0;
+							}
+							else {
+								m_K[g_idx] = 0;
+							}
+						}
+					}
+				}
+
+			}
 		}
 	}
 

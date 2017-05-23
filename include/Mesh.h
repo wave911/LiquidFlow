@@ -24,6 +24,7 @@ class CMesh
 		virtual std::map<int,std::vector<int>> getElements() = 0;
 		virtual std::vector<int> getElementByIndex(const int idx) = 0;
 		virtual CPoint3D getPointByIndex(const int idx) = 0;
+		virtual bool isBorderPoint(const int idx) = 0;
 };
 
 class CSalomeMesh : public CMesh 
@@ -50,7 +51,8 @@ class CSalomeMesh : public CMesh
 		virtual std::vector<CPoint3D> getPoints();
 		virtual std::map<int,std::vector<int>> getElements();
 		virtual std::vector<int> getElementByIndex(const int idx);
-		virtual CPoint3D getPointByIndex(const int idx);		
+		virtual CPoint3D getPointByIndex(const int idx);
+		virtual bool isBorderPoint(const int idx);
 
 	private:
 		std::vector<std::string> split(const std::string& text, const std::string& delims);

@@ -103,6 +103,13 @@ CPoint3D CSalomeMesh::getPointByIndex(const int idx) {
 	return m_points[idx];
 }
 
+bool CSalomeMesh::isBorderPoint(const int idx) {
+	if (m_borderPoints.count(idx) != 0)
+		return true;
+	else
+		return false;
+}
+
 void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap) {
 	vector<int> temp;
 	for (int i = 2; i < tokens.size(); i++) { 
