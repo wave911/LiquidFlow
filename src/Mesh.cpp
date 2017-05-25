@@ -110,6 +110,10 @@ bool CSalomeMesh::isBorderPoint(const int idx) {
 		return false;
 }
 
+std::set<int> getBorderPoints() {
+	return m_borderElements;
+}
+
 void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap) {
 	vector<int> temp;
 	for (int i = 2; i < tokens.size(); i++) { 

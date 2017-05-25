@@ -14,6 +14,19 @@ void CFem::dgemv(char *trans, int m, int n, real_t alpha, real_t *a,
 #endif
 }
 
+void CFem::dgesv(int n, real_t *M, real_t *B ) {
+	int status = 0;
+	int NRHS = 1;
+	int* IPIV = new int[n];
+	int N = n;
+    int lda = n;
+    int ldb = n;
+#ifdef LIBBLASLAPACK
+	dgesv_((integer*)&N, (integer*)&NRHS, M, (integer*)&lda, (integer*)IPIV, B, (integer*)&ldb, (integer*)&status);
+#endif	
+	delete [] n;
+}
+
 CFemLocalLinear2D::CFemLocalLinear2D(CMesh *mesh) {
 	m_mesh = mesh;
 }
@@ -234,34 +247,58 @@ void CFemLocalLinear2D::assembleRightVector() {
 				m_F[element[j] * ptnumber + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1))/(this->getSquare(i) * 3);
 				m_F[element[j] * ptnumber + 2] += 0;
 			}
-			else {
-				m_F[element[j] * ptnumber + 0] = 1;
-				m_F[element[j] * ptnumber + 1] = 1;
-				m_F[element[j] * ptnumber + 2] = 1;
+		}
+	}
+}
 
-				for (int k = 0; k < ptnumber; k++) {
-					for (int ii = 0; ii < n; ii++) {
-						for (int jj = 0; jj < n; jj++) {
-							int pivot = (ptnumber * n * n) * k + n * element[j];
-							int g_idx = pivot + jj * m_mesh->getPointsNumber() * n + ii;
-							if (k == element[j]) {
-								if (ii == jj) {
-									m_K[g_idx] = 1;
-								}
-								else
-									m_K[g_idx] = 0;
-							}
-							else {
-								m_K[g_idx] = 0;
-							}
+void CFemLocalLinear2D::setBorderConditions(const int timestep) {
+	const int n = 3;
+	int ptnumber = m_mesh->getPointsNumber();
+	std::set<int> borderElements = m_mesh->getBorderPoints();
+
+	for (auto const& i : borderElements) {
+		m_F[i * ptnumber + 0] = m_pr->getBorderCondition(i, 0, 0);
+		m_F[i * ptnumber + 1] = m_pr->getBorderCondition(i, 1, 0);
+		m_F[i * ptnumber + 2] = m_pr->getBorderCondition(i, 2, 0);
+
+		for (int k = 0; k < ptnumber; k++) {
+			for (int ii = 0; ii < n; ii++) {
+				for (int jj = 0; jj < n; jj++) {
+					int pivot = (ptnumber * n * n) * k + n * i;
+					int g_idx = pivot + jj * m_mesh->getPointsNumber() * n + ii;
+					if (k == i) {
+						if (ii == jj) {
+							m_K[g_idx] = 1;
 						}
+						else
+							m_K[g_idx] = 0;
+					}
+					else {
+						m_K[g_idx] = 0;
 					}
 				}
-
 			}
 		}
 	}
+}
 
+void CFemLocalLinear2D::perform(const int timesteps) {
+	int n = 3;
+	this->assembleKMatrix();
+	for (int i = 1; i < timesteps; i++) {
+		this->assembleRightVector(i);
+		this->setBorderConditions(i);
+		dgesv(m_mesh->getPointsNumber() * n, m_K, m_F);
+		m_pr->setU(m_F);
+	}
+}
+
+bool CSimplePoissonSolver2D::LapackGauss(real_t *M, real_t *B, const int count)
+{
+	LapackGaussCore(M, B, count);
+
+	memcpy(m_P, B, count * sizeof(real_t));
+	return true;
 }
 
 CFemLocalLinear3D::CFemLocalLinear3D(CMesh *mesh) {

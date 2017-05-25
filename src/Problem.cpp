@@ -31,7 +31,7 @@ void CProblem2DCircle::init() {
 	m_U = new real_t[count * n];
 
 	for (int i = 0; i < count; i++) {
-		CPoint3D p = m_mesh->getPointByIndex(const int idx);
+		CPoint3D p = m_mesh->getPointByIndex(i);
 		m_U[i * n + 0] = -p.m_y;
 		m_U[i * n + 1] = p.m_x;
 		m_U[i * n + 2] = 0;
@@ -54,5 +54,19 @@ real_t* CProblem2DCircle::getU() {
 real_t CProblem2DCircle::getU(const int idx, const short dim) {
 	int n = 3;
 	return m_U[idx * n + dim];
+}
+
+real_t getBorderCondition(const int idx, const int dim, const real_t time) {
+	CPoint3D p = m_mesh->getPointByIndex(idx);
+	switch(dim) {
+		case 0:
+			return -p.m_y;
+		case 1:
+			return p.m_x;
+		case 2:
+			return -0.5 * (p.m_x * p.m_x + p.m_y * p.m_y);
+		default:
+			return 0;
+	}
 }
 

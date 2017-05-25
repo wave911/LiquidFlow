@@ -16,10 +16,13 @@ class CFem
 													  const CPoint3D p) = 0;		
 		virtual real_t getdNdX(const int idxN, const int element) = 0;	
 		virtual real_t getdNdY(const int idxN, const int element) = 0;
-		virtual void assembleKMatrix();
-		virtual void assembleRightVector();
+		virtual void assembleKMatrix() = 0;
+		virtual void assembleRightVector() = 0;
+		virtual void setBorderConditions(const int timestep) = 0;
+		virtual void perform(const int timesteps) = 0;
 		void dgemv(char *trans, int m, int n, real_t alpha, real_t *a, 
 				   int lda, real_t *x, int incx, real_t beta, real_t *y, int incy);	
+		void dgesv(int n, real_t *M, real_t *B );
 };
 
 class CFemLocalLinear2D : public CFem
@@ -41,6 +44,8 @@ class CFemLocalLinear2D : public CFem
 		virtual real_t getdNdY(const int idxN, const int element);
 		virtual void assembleKMatrix();
 		virtual void assembleRightVector();
+		virtual void setBorderConditions(const int timestep);
+		virtual void perform(const int timesteps);
 		real_t getSquare(const int element);
 	protected:
 		virtual real_t getdKsidX(const int idx, const int element);

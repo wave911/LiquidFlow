@@ -21,6 +21,7 @@ class CMesh
 		virtual int getElementsNumber() = 0;
 		virtual int getBorderElementsNumber() = 0;
 		virtual std::vector<CPoint3D> getPoints() = 0;
+		virtual std::set<int> getBorderPoints() = 0;
 		virtual std::map<int,std::vector<int>> getElements() = 0;
 		virtual std::vector<int> getElementByIndex(const int idx) = 0;
 		virtual CPoint3D getPointByIndex(const int idx) = 0;
@@ -49,6 +50,7 @@ class CSalomeMesh : public CMesh
 		virtual int getElementsNumber();
 		virtual int getBorderElementsNumber();
 		virtual std::vector<CPoint3D> getPoints();
+		virtual std::set<int> getBorderPoints();
 		virtual std::map<int,std::vector<int>> getElements();
 		virtual std::vector<int> getElementByIndex(const int idx);
 		virtual CPoint3D getPointByIndex(const int idx);

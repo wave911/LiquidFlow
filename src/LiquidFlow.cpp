@@ -55,6 +55,7 @@ int main()
 	mesh->Init(MeshGeometryType::G2D);
 
 	CFem *fem = new CFemLocalLinear2D(mesh);
+	fem->perform(2);
 
 	//cout << "here1" << endl;
 	std::vector<int> elem = mesh->getElementByIndex(0);

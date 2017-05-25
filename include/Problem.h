@@ -15,8 +15,11 @@ class CProblem {
 		real_t getTau();
 		virtual real_t setRe(const real_t Re);
 		virtual real_t setTau(const real_t t);
-		virtual real_t *getU();
-		virtual real_t getU(const int idx, const short dim);		
+		virtual void setU(const int idx, const short dim, const real_t value) {};
+		virtual void setU(real_t *value) {};
+		virtual real_t *getU() {};
+		virtual real_t getU(const int idx, const short dim) {};
+		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time) {};		
 };
 
 class CProblem2DCircle : public CProblem {
@@ -31,6 +34,7 @@ class CProblem2DCircle : public CProblem {
 		virtual void setU(real_t *value);
 		virtual real_t *getU();
 		virtual real_t getU(const int idx, const short dim);
+		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
 };
 
 #endif /* PROBLEM_H_ */
