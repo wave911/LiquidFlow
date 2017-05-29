@@ -35,6 +35,7 @@ CFemLocalLinear2D::~CFemLocalLinear2D() {
 	delete [] m_K;
 	delete [] m_C;
 	delete [] m_F;
+	delete [] m_U_temp;
 }
 
 void CFemLocalLinear2D::init(CProblem *pr) {
@@ -43,6 +44,7 @@ void CFemLocalLinear2D::init(CProblem *pr) {
 	m_K = new real_t[count * n * count * n];
 	m_C = new real_t[count * n * count * n];
 	m_F = new real_t[count * n];
+	m_U_temp = new real_t[count * n];
 	m_pr = pr;
 }
 
@@ -56,10 +58,10 @@ std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element,
 	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
 	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
 
-	cout << "triangle" << endl;
-	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
-	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
-	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
+//	cout << "triangle" << endl;
+//	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
+//	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
+//	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
 
 	real_t square = getSquare(element);
 	cout << "square " << square << endl;  
@@ -240,23 +242,39 @@ void CFemLocalLinear2D::assembleRightVector() {
 	for (int i = 0; i < elnumber; i++) {
 		std::list<int> element = m_mesh->getElementByIndex(i);
 		for (int j = 0; j < element.size(); j++) {
-			if (!m_mesh->isBorderPoint(element[j])) {
-				real_t U1 = m_pr->getU(i, 0);
-				real_t U2 = m_pr->getU(i, 1);
-				m_F[element[j] * ptnumber + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0))/(this->getSquare(i) * 3);
-				m_F[element[j] * ptnumber + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1))/(this->getSquare(i) * 3);
-				m_F[element[j] * ptnumber + 2] += 0;
-			}
+			//if (!m_mesh->isBorderPoint(element[j])) {
+			real_t U1 = m_pr->getU(element[j], 0);
+			real_t U2 = m_pr->getU(element[j], 1);
+			m_F[element[j] * ptnumber + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0))/(this->getSquare(i) * 3);
+			m_F[element[j] * ptnumber + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1))/(this->getSquare(i) * 3);
+			m_F[element[j] * ptnumber + 2] += 0;
+			//}
+			m_U_temp[element[j] * ptnumber + 0] = m_pr->getU(element[j], 0);
+			m_U_temp[element[j] * ptnumber + 1] = m_pr->getU(element[j], 1);
+			m_U_temp[element[j] * ptnumber + 2] = 0;
 		}
 	}
+
+	char *ch = "N";
+	int m_m = m_mesh->getPointsNumber() * n,
+		m_n = m_mesh->getPointsNumber() * n,
+		lda = m_mesh->getPointsNumber() * n,
+		incx = 1,
+		incy = 1;
+	real_t tau = 1/(2 * square),
+		   beta = 0;
+
+	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0],
+				 incx, beta, &m_F[0], incy);
+
 }
 
 void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 	const int n = 3;
 	int ptnumber = m_mesh->getPointsNumber();
-	std::set<int> borderElements = m_mesh->getBorderPoints();
+	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
-	for (auto const& i : borderElements) {
+	for (auto const& i : borderPoints) {
 		m_F[i * ptnumber + 0] = m_pr->getBorderCondition(i, 0, 0);
 		m_F[i * ptnumber + 1] = m_pr->getBorderCondition(i, 1, 0);
 		m_F[i * ptnumber + 2] = m_pr->getBorderCondition(i, 2, 0);
@@ -319,11 +337,11 @@ std::vector<real_t> CFemLocalLinear3D::getLocalCoordinates(const int element,
 	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
 	CPoint3D p4 = m_mesh->getPointByIndex(points[3]);
 
-	cout << "tetrahedra" << endl;
-	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
-	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
-	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
-	cout << p4.m_x << " " << p4.m_y << " " << p4.m_z << endl;
+//	cout << "tetrahedra" << endl;
+//	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
+//	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
+//	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
+//	cout << p4.m_x << " " << p4.m_y << " " << p4.m_z << endl;
 
 	real_t volume = getVolume(element, 0);
 	real_t vo1 = getVolume(element, 1);
@@ -435,5 +453,21 @@ real_t CFemLocalLinear3D::getdKsidZ(const int idx, const int element) {
 }
 
 real_t CFemLocalLinear3D::getdNdKsi(const int idxN, const int idxKsi) {
+
+}
+
+void CFemLocalLinear3D::assembleKMatrix() {
+
+}
+
+void CFemLocalLinear3D::assembleRightVector() {
+
+}
+
+void CFemLocalLinear3D::setBorderConditions(const int timestep) {
+
+}
+
+void CFemLocalLinear3D::perform(const int timesteps) {
 
 }

@@ -10,6 +10,7 @@
 
 #define CFG_PLENGTH 256
 #define CONFIG_FILENAME "cfg.txt"
+#define K_MATRIX_FILENAME "kmatrix.bin"
 
 class CConfigFileParser
 {

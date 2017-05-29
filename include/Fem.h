@@ -32,7 +32,8 @@ class CFemLocalLinear2D : public CFem
 		CProblem *m_pr;
 		real_t *m_K,
 			   *m_C,
-			   *m_F;	
+			   *m_F,
+			   *m_U_temp;
 
 	public:
 		CFemLocalLinear2D(CMesh *mesh);
@@ -68,7 +69,10 @@ class CFemLocalLinear3D : public CFem
 													  const CPoint3D p);		
 		virtual real_t getdNdX(const int idxN, const int element);
 		virtual real_t getdNdY(const int idxN, const int element);
-	
+		virtual void assembleKMatrix();
+		virtual void assembleRightVector();
+		virtual void setBorderConditions(const int timestep);
+		virtual void perform(const int timesteps);
 	protected:
 		real_t getVolume(const int element, const int subVolume);
 		virtual real_t getdKsidX(const int idx, const int element);
