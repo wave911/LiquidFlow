@@ -1,4 +1,4 @@
-SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp 
+SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp Problem.cpp
 
 RM = rm -f
 CC = g++

@@ -8,9 +8,9 @@ class CProblem {
 		real_t m_Re;
 		real_t m_t;
 	public:
-		CProblem() {};
+		CProblem() {m_Re = 0; m_t = 0;};
 		virtual ~CProblem() {};
-		virtual void init() {m_Re = 0; m_t = 0;};
+		virtual void init() {};
 		real_t getRe();
 		real_t getTau();
 		virtual real_t setRe(const real_t Re);
@@ -23,13 +23,13 @@ class CProblem {
 };
 
 class CProblem2DCircle : public CProblem {
-	private:
+	protected:
 		CMesh *m_mesh;
 		real_t *m_U;
-
 	public:
 		CProblem2DCircle(CMesh *mesh);
 		virtual ~CProblem2DCircle();
+		virtual void init();
 		virtual void setU(const int idx, const short dim, const real_t value);
 		virtual void setU(real_t *value);
 		virtual real_t *getU();

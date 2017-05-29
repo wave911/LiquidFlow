@@ -66,7 +66,7 @@ int CSalomeMesh::Init(MeshGeometryType meshType) {
 	    	}	    	
     	}
     }
-    getBorderPoints();
+    createBorderPoints();
 
     cout << m_mesh.size() << endl;
     cout << m_borderElements.size() << endl;
@@ -110,8 +110,8 @@ bool CSalomeMesh::isBorderPoint(const int idx) {
 		return false;
 }
 
-std::set<int> getBorderPoints() {
-	return m_borderElements;
+std::set<int> CSalomeMesh::getBorderPoints() {
+	return m_borderPoints;
 }
 
 void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap) {
@@ -126,7 +126,7 @@ void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::
 	temp.clear();
 }
 
-void CSalomeMesh::getBorderPoints() {
+void CSalomeMesh::createBorderPoints() {
 	for (auto const& x : m_borderElements) {
 		vector<int> pts = x.second;
 		for (auto const& p: pts) {

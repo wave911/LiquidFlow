@@ -56,7 +56,7 @@ real_t CProblem2DCircle::getU(const int idx, const short dim) {
 	return m_U[idx * n + dim];
 }
 
-real_t getBorderCondition(const int idx, const int dim, const real_t time) {
+real_t CProblem2DCircle::getBorderCondition(const int idx, const int dim, const real_t time) {
 	CPoint3D p = m_mesh->getPointByIndex(idx);
 	switch(dim) {
 		case 0:

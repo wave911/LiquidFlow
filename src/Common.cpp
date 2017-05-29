@@ -8,6 +8,7 @@
 #include <regex.h>
 #include <iostream>
 #include <fstream>
+#include "real_type.h"
 
 using namespace std;
 
@@ -47,4 +48,8 @@ std::string CConfigFileParser::getParameter(const char *pname_regexp) {
     delete (matches);
 
     return res;
+}
+
+void dump2binfile(const real_t *buf, const int count, const char *filename) {
+
 }

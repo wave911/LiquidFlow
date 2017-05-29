@@ -33,6 +33,7 @@
 #include "Common.h"
 #include "Mesh.h"
 #include "Fem.h"
+#include "Problem.h"
 
 using namespace std;
 
@@ -55,24 +56,27 @@ int main()
 	mesh->Init(MeshGeometryType::G2D);
 
 	CFem *fem = new CFemLocalLinear2D(mesh);
+	CProblem *pr = new CProblem2DCircle(mesh);
+	fem->init(pr);
 	fem->perform(2);
 
-	//cout << "here1" << endl;
-	std::vector<int> elem = mesh->getElementByIndex(0);
-	//cout << "here2" << endl;
-	//vector<CPoint3D> pp = mesh->getPoints();
-	//cout << elem.size() << endl;
-	CPoint3D p = mesh->getPointByIndex(elem[0]);
-	//cout << "here3" << endl;
-	cout << p.m_x << " " << p.m_y << endl;
-	std::vector<real_t> ksi = fem->getLocalCoordinates(0, p);
-	cout << "here4" << endl;
-	cout << ksi[0] << endl;
-	cout << ksi[1] << endl;
-	cout << ksi[2] << endl;
-	//cout << ksi[3] << endl;
+	// //cout << "here1" << endl;
+	// std::vector<int> elem = mesh->getElementByIndex(0);
+	// //cout << "here2" << endl;
+	// //vector<CPoint3D> pp = mesh->getPoints();
+	// //cout << elem.size() << endl;
+	// CPoint3D p = mesh->getPointByIndex(elem[0]);
+	// //cout << "here3" << endl;
+	// cout << p.m_x << " " << p.m_y << endl;
+	// std::vector<real_t> ksi = fem->getLocalCoordinates(0, p);
+	// cout << "here4" << endl;
+	// cout << ksi[0] << endl;
+	// cout << ksi[1] << endl;
+	// cout << ksi[2] << endl;
+	// //cout << ksi[3] << endl;
 
 	delete(fem);
 	delete (mesh);
+	delete (pr);
 	return 0;
 }

@@ -2,6 +2,8 @@
 #include <iostream>
 #include "f2c.h"
 #include "dgemv.h"
+#include "dgesv.h"
+
 using namespace std;
 
 void CFem::dgemv(char *trans, int m, int n, real_t alpha, real_t *a, 
@@ -24,7 +26,6 @@ void CFem::dgesv(int n, real_t *M, real_t *B ) {
 #ifdef LIBBLASLAPACK
 	dgesv_((integer*)&N, (integer*)&NRHS, M, (integer*)&lda, (integer*)IPIV, B, (integer*)&ldb, (integer*)&status);
 #endif	
-	delete [] n;
 }
 
 CFemLocalLinear2D::CFemLocalLinear2D(CMesh *mesh) {
@@ -46,6 +47,7 @@ void CFemLocalLinear2D::init(CProblem *pr) {
 	m_F = new real_t[count * n];
 	m_U_temp = new real_t[count * n];
 	m_pr = pr;
+	m_pr->init();
 }
 
 std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element, 
@@ -101,7 +103,7 @@ std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element,
 
 real_t CFemLocalLinear2D::getdNdX(const int idxN, const int element) {
 	real_t sum = 0;
-	for (int i = 0; int < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		sum += getdNdKsi(idxN, i) * getdKsidX(i, element);
 	}
 	return sum;
@@ -109,7 +111,7 @@ real_t CFemLocalLinear2D::getdNdX(const int idxN, const int element) {
 
 real_t CFemLocalLinear2D::getdNdY(const int idxN, const int element) {
 	real_t sum = 0;
-	for (int i = 0; int < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		sum += getdNdKsi(idxN, i) * getdKsidY(i, element);
 	}
 	return sum;
@@ -168,23 +170,23 @@ real_t CFemLocalLinear2D::getdNdKsi(const int idxN, const int idxKsi) {
 		return 0;
 }
 
-real_t CFemLocalLinear2D::getdUdX(const int element, const int dim) {
-	std::vector<int> element = m_mesh->getElementByIndex(i);
+real_t CFemLocalLinear2D::getdUdX(const int element_idx, const int dim) {
+	std::vector<int> element = m_mesh->getElementByIndex(element_idx);
 	real_t res = 0;
 	for (int i = 0; i < element.size(); i++) {
 		real_t U = m_pr->getU(element[i], dim);
-		res += U * getdNdX(i, element);
+		res += U * getdNdX(i, element_idx);
 	}
 
 	return res;
 }
 
-real_t CFemLocalLinear2D::getdUdY(const int element, const int dim) {
-	std::vector<int> element = m_mesh->getElementByIndex(i);
+real_t CFemLocalLinear2D::getdUdY(const int element_idx, const int dim) {
+	std::vector<int> element = m_mesh->getElementByIndex(element_idx);
 	real_t res = 0;
 	for (int i = 0; i < element.size(); i++) {
 		real_t U = m_pr->getU(element[i], dim);
-		res += U * getdNdY(i, element);
+		res += U * getdNdY(i, element_idx);
 	}
 
 	return res;
@@ -233,14 +235,14 @@ void CFemLocalLinear2D::assembleKMatrix() {
 	}
 }
 
-void CFemLocalLinear2D::assembleRightVector() {
+void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 	const int n = 3;
 	real_t ff1 = 0, ff2 = 0, ff3 = 0;
 	int elnumber = m_mesh->getElementsNumber();
 	int ptnumber = m_mesh->getPointsNumber();
 
 	for (int i = 0; i < elnumber; i++) {
-		std::list<int> element = m_mesh->getElementByIndex(i);
+		std::vector<int> element = m_mesh->getElementByIndex(i);
 		for (int j = 0; j < element.size(); j++) {
 			//if (!m_mesh->isBorderPoint(element[j])) {
 			real_t U1 = m_pr->getU(element[j], 0);
@@ -261,11 +263,10 @@ void CFemLocalLinear2D::assembleRightVector() {
 		lda = m_mesh->getPointsNumber() * n,
 		incx = 1,
 		incy = 1;
-	real_t tau = 1/(2 * square),
-		   beta = 0;
+	real_t tau = 1/m_pr->getTau(),
+		   beta = 1;
 
-	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0],
-				 incx, beta, &m_F[0], incy);
+	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0], incx, beta, &m_F[0], incy);
 
 }
 
@@ -309,14 +310,6 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 		dgesv(m_mesh->getPointsNumber() * n, m_K, m_F);
 		m_pr->setU(m_F);
 	}
-}
-
-bool CSimplePoissonSolver2D::LapackGauss(real_t *M, real_t *B, const int count)
-{
-	LapackGaussCore(M, B, count);
-
-	memcpy(m_P, B, count * sizeof(real_t));
-	return true;
 }
 
 CFemLocalLinear3D::CFemLocalLinear3D(CMesh *mesh) {
@@ -460,7 +453,7 @@ void CFemLocalLinear3D::assembleKMatrix() {
 
 }
 
-void CFemLocalLinear3D::assembleRightVector() {
+void CFemLocalLinear3D::assembleRightVector(const int timestep) {
 
 }
 
@@ -469,5 +462,9 @@ void CFemLocalLinear3D::setBorderConditions(const int timestep) {
 }
 
 void CFemLocalLinear3D::perform(const int timesteps) {
+
+}
+
+void CFemLocalLinear3D::init(CProblem *pr) {
 
 }

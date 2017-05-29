@@ -60,7 +60,7 @@ class CSalomeMesh : public CMesh
 		std::vector<std::string> split(const std::string& text, const std::string& delims);
 		void addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap);
 		std::string trim(const std::string &s);
-		void getBorderPoints();
+		void createBorderPoints();
 
 };
 
