@@ -51,5 +51,17 @@ std::string CConfigFileParser::getParameter(const char *pname_regexp) {
 }
 
 void dump2binfile(const real_t *buf, const int count, const char *filename) {
+	ofstream out(filename, ios::out | ios::binary);
+	if(!out) {
+		cout << "Cannot open file " << filename << endl;;
+		return;
+	}
+	out.write((char *) &buf, sizeof(real_t) * count);
+	out.close();
+}
 
+void binfile2data(const real_t *buf, const int count, const char *filename) {
+	ifstream in(filename, ios::in | ios::binary);
+	in.read((char *) &buf, sizeof(real_t) * count);
+	in.close();
 }

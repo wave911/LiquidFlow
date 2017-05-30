@@ -22,6 +22,7 @@ class CConfigFileParser
 };
 
 void dump2binfile(const real_t *buf, const int count, const char *filename);
+void binfile2data(const real_t *buf, const int count, const char *filename);
 
 enum class MeshGeometryType {G2D = 0, G3D = 1};
 
