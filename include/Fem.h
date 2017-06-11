@@ -38,7 +38,7 @@ class CFemLocalLinear2D : public CFem
 
 	public:
 		CFemLocalLinear2D(CMesh *mesh);
-		virtual ~CFemLocalLinear2D();
+		~CFemLocalLinear2D();
 		virtual void init(CProblem *pr);
 		virtual std::vector<real_t> getLocalCoordinates(const int element, 
 													  const CPoint3D p);		

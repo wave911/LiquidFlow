@@ -118,7 +118,7 @@ void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::
 	vector<int> temp;
 	for (int i = 2; i < tokens.size(); i++) { 
 		if (trim(tokens[i]).length() != 0) {
-			temp.push_back(stoi(tokens[i]));
+			temp.push_back(stoi(tokens[i]) - 1);
 		}
 	}
 	int index = aMap.size();

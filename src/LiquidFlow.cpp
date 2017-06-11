@@ -51,32 +51,19 @@ int main()
 	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
 	MeshType = std::stoi(cfp.getParameter("^MeshType=(\\S+)"));
 
-	//CMesh *mesh = new CSalomeMesh("../mesh/Mesh_box.dat");
 	CMesh *mesh = new CSalomeMesh("../mesh/Mesh_1_2D.dat");
 	mesh->Init(MeshGeometryType::G2D);
-
 	CFem *fem = new CFemLocalLinear2D(mesh);
 	CProblem *pr = new CProblem2DCircle(mesh);
+	pr->setRe(1.0);
+	pr->setTau(0.1);
 	fem->init(pr);
-	fem->perform(2);
+	fem->perform(3);
 
-	// //cout << "here1" << endl;
-	// std::vector<int> elem = mesh->getElementByIndex(0);
-	// //cout << "here2" << endl;
-	// //vector<CPoint3D> pp = mesh->getPoints();
-	// //cout << elem.size() << endl;
-	// CPoint3D p = mesh->getPointByIndex(elem[0]);
-	// //cout << "here3" << endl;
-	// cout << p.m_x << " " << p.m_y << endl;
-	// std::vector<real_t> ksi = fem->getLocalCoordinates(0, p);
-	// cout << "here4" << endl;
-	// cout << ksi[0] << endl;
-	// cout << ksi[1] << endl;
-	// cout << ksi[2] << endl;
-	// //cout << ksi[3] << endl;
+	delete pr;
+	delete mesh;
+	delete fem;
 
-	delete(fem);
-	delete (mesh);
-	delete (pr);
+
 	return 0;
 }

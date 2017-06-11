@@ -26,17 +26,27 @@ void CFem::dgesv(int n, real_t *M, real_t *B ) {
 #ifdef LIBBLASLAPACK
 	dgesv_((integer*)&N, (integer*)&NRHS, M, (integer*)&lda, (integer*)IPIV, B, (integer*)&ldb, (integer*)&status);
 #endif	
+	delete [] IPIV;
 }
 
 CFemLocalLinear2D::CFemLocalLinear2D(CMesh *mesh) {
 	m_mesh = mesh;
+	m_K = nullptr;
+	m_C = nullptr;
+	m_F = nullptr;
+	m_U_temp = nullptr;
+
 }
 
 CFemLocalLinear2D::~CFemLocalLinear2D() {
-	delete [] m_K;
-	delete [] m_C;
-	delete [] m_F;
-	delete [] m_U_temp;
+	if (this->m_K != nullptr)
+		delete [] this->m_K;
+	if (this->m_C != nullptr)
+		delete [] this->m_C;
+	if (this->m_F != nullptr)
+		delete [] this->m_F;
+	if (this->m_U_temp != nullptr)
+		delete [] this->m_U_temp;
 }
 
 void CFemLocalLinear2D::init(CProblem *pr) {
@@ -59,11 +69,6 @@ std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element,
 	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
 	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
 	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
-
-//	cout << "triangle" << endl;
-//	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
-//	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
-//	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
 
 	real_t square = getSquare(element);
 	cout << "square " << square << endl;  
@@ -244,16 +249,16 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 	for (int i = 0; i < elnumber; i++) {
 		std::vector<int> element = m_mesh->getElementByIndex(i);
 		for (int j = 0; j < element.size(); j++) {
-			//if (!m_mesh->isBorderPoint(element[j])) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
-			m_F[element[j] * ptnumber + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0))/(this->getSquare(i) * 3);
-			m_F[element[j] * ptnumber + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1))/(this->getSquare(i) * 3);
-			m_F[element[j] * ptnumber + 2] += 0;
-			//}
-			m_U_temp[element[j] * ptnumber + 0] = m_pr->getU(element[j], 0);
-			m_U_temp[element[j] * ptnumber + 1] = m_pr->getU(element[j], 1);
-			m_U_temp[element[j] * ptnumber + 2] = 0;
+
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/3);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/3);
+			m_F[element[j] * n + 2] += -2 * (getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/6);
+
+			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
+			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
+			m_U_temp[element[j] * n + 2] = 0;
 		}
 	}
 
@@ -276,9 +281,9 @@ void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
 	for (auto const& i : borderPoints) {
-		m_F[i * ptnumber + 0] = m_pr->getBorderCondition(i, 0, 0);
-		m_F[i * ptnumber + 1] = m_pr->getBorderCondition(i, 1, 0);
-		m_F[i * ptnumber + 2] = m_pr->getBorderCondition(i, 2, 0);
+		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, 0);
+		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, 0);
+		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, 0);
 
 		for (int k = 0; k < ptnumber; k++) {
 			for (int ii = 0; ii < n; ii++) {
@@ -303,12 +308,32 @@ void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 
 void CFemLocalLinear2D::perform(const int timesteps) {
 	int n = 3;
+	int count = m_mesh->getPointsNumber();
+	cout << " count " << count << endl;
+	cout << "data size " << count * n * count * n * sizeof(real_t) << endl;
+	memset(m_F, 0, sizeof(real_t) * count * n);
+	memset(m_U_temp, 0, sizeof(real_t) * count * n);
+	memset(m_K, 0, sizeof(real_t) * count * n * count * n);
+	memset(m_C, 0, sizeof(real_t) * count * n * count * n);
 	this->assembleKMatrix();
-	for (int i = 1; i < timesteps; i++) {
-		this->assembleRightVector(i);
-		this->setBorderConditions(i);
-		dgesv(m_mesh->getPointsNumber() * n, m_K, m_F);
-		m_pr->setU(m_F);
+	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
+	for (int step = 1; step < timesteps; step++) {
+	 	this->assembleRightVector(step);
+
+
+
+	 	this->setBorderConditions(step);
+	 	dgesv(count * n, m_K, m_F);
+	 	m_pr->setU(m_F);
+
+	 	for (int i = 0; i < count; i++) {
+	 		cout << i * n + 0 << "=" << m_F[i * n + 0] << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
+	 		cout << i * n + 1 << "=" << m_F[i * n + 1] << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
+	 		cout << i * n + 2 << "=" << m_F[i * n + 2] << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
+	 	}
+
+	 	memset(m_F, 0, count * n * sizeof(real_t));
+	 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	}
 }
 
