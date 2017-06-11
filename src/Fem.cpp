@@ -56,6 +56,12 @@ void CFemLocalLinear2D::init(CProblem *pr) {
 	m_C = new real_t[count * n * count * n];
 	m_F = new real_t[count * n];
 	m_U_temp = new real_t[count * n];
+
+	memset(m_F, 0, sizeof(real_t) * count * n);
+	memset(m_U_temp, 0, sizeof(real_t) * count * n);
+	memset(m_K, 0, sizeof(real_t) * count * n * count * n);
+	memset(m_C, 0, sizeof(real_t) * count * n * count * n);
+
 	m_pr = pr;
 	m_pr->init();
 }
@@ -211,7 +217,9 @@ void CFemLocalLinear2D::assembleKMatrix() {
 					int pivot = (m_mesh->getPointsNumber() * n * n) * element[g_col] + n * element[g_row];
 					for (int l_col = 0; l_col < n; l_col++) {
 						for (int l_row = 0; l_row < n; l_row++) {
-							if (l_col == g_row) {
+							int idx = (element[g_row] * n + l_row) * n * m_mesh->getPointsNumber() + element[g_col] * n + l_col;
+
+							if (l_col == l_row) {
 								if (g_col == g_row)
 									cc = getSquare(i)/6;
 								else
@@ -220,18 +228,19 @@ void CFemLocalLinear2D::assembleKMatrix() {
 								kk = kk * getSquare(i)/12;
 								if (g_row < n - 1)
 									kk = kk/m_pr->getRe();
-
 							} 
 							else {
 								if ((2 == l_col) && (0 == l_row))
-									kk = getdNdX(g_col, i) * getSquare(i)/3;
+									kk = getdNdX(g_row, i) * getSquare(i)/3;
 								if ((2 == l_col) && (1 == l_row))
-									kk = getdNdY(g_col, i) * getSquare(i)/3;
+									kk = getdNdY(g_row, i) * getSquare(i)/3;
 							}
 
 							int g_idx = pivot + l_col * m_mesh->getPointsNumber() * n + l_row;
-							m_K[g_idx] += (kk + cc)/m_pr->getTau();
-							m_C[g_idx] += cc;
+							m_K[idx] += (kk + cc)/m_pr->getTau();
+							m_C[idx] += cc;
+							kk = 0;
+							cc = 0;
 						}
 					}
 				}
@@ -309,31 +318,21 @@ void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 void CFemLocalLinear2D::perform(const int timesteps) {
 	int n = 3;
 	int count = m_mesh->getPointsNumber();
-	cout << " count " << count << endl;
-	cout << "data size " << count * n * count * n * sizeof(real_t) << endl;
-	memset(m_F, 0, sizeof(real_t) * count * n);
-	memset(m_U_temp, 0, sizeof(real_t) * count * n);
-	memset(m_K, 0, sizeof(real_t) * count * n * count * n);
-	memset(m_C, 0, sizeof(real_t) * count * n * count * n);
+
 	this->assembleKMatrix();
 	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
-
-
-
 	 	this->setBorderConditions(step);
 	 	dgesv(count * n, m_K, m_F);
 	 	m_pr->setU(m_F);
-
-	 	for (int i = 0; i < count; i++) {
-	 		cout << i * n + 0 << "=" << m_F[i * n + 0] << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
-	 		cout << i * n + 1 << "=" << m_F[i * n + 1] << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
-	 		cout << i * n + 2 << "=" << m_F[i * n + 2] << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
-	 	}
-
 	 	memset(m_F, 0, count * n * sizeof(real_t));
 	 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
+	}
+	for (int i = 0; i < count; i++) {
+		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
+		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
+		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
 	}
 }
 
@@ -354,12 +353,6 @@ std::vector<real_t> CFemLocalLinear3D::getLocalCoordinates(const int element,
 	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
 	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
 	CPoint3D p4 = m_mesh->getPointByIndex(points[3]);
-
-//	cout << "tetrahedra" << endl;
-//	cout << p1.m_x << " " << p1.m_y << " " << p1.m_z << endl;
-//	cout << p2.m_x << " " << p2.m_y << " " << p2.m_z << endl;
-//	cout << p3.m_x << " " << p3.m_y << " " << p3.m_z << endl;
-//	cout << p4.m_x << " " << p4.m_y << " " << p4.m_z << endl;
 
 	real_t volume = getVolume(element, 0);
 	real_t vo1 = getVolume(element, 1);

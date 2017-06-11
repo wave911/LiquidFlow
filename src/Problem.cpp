@@ -44,7 +44,8 @@ void CProblem2DCircle::setU(const int idx, const short dim, const real_t value) 
 }
 
 void CProblem2DCircle::setU(real_t *value) {
-	*m_U = *value;
+	int n = 3;
+	memcpy(m_U, value, m_mesh->getPointsNumber() * n * sizeof(real_t));
 }
 
 real_t* CProblem2DCircle::getU() {

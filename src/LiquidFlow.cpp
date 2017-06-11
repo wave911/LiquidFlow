@@ -45,8 +45,10 @@ int main()
 		Iterations = 0,
 		SolverType = 0,
 		MeshType = 0;
+	real_t Tau = 0;
 
 	Re = std::stoi(cfp.getParameter("^Re=(\\S+)"));
+	Tau = std::stof(cfp.getParameter("^Tau=(\\S+)"));
 	Iterations = std::stoi(cfp.getParameter("^Iterations=(\\S+)"));
 	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
 	MeshType = std::stoi(cfp.getParameter("^MeshType=(\\S+)"));
@@ -56,9 +58,9 @@ int main()
 	CFem *fem = new CFemLocalLinear2D(mesh);
 	CProblem *pr = new CProblem2DCircle(mesh);
 	pr->setRe(1.0);
-	pr->setTau(0.1);
+	pr->setTau(Tau);
 	fem->init(pr);
-	fem->perform(3);
+	fem->perform(Iterations);
 
 	delete pr;
 	delete mesh;

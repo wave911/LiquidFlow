@@ -62,3 +62,24 @@ void binfile2data(real_t *buf, const int count, const char *filename) {
     fread(buf, sizeof(*buf), count, file );
     fclose(file);
 }
+
+void printMatrix2File(const char *filename, const real_t *m, const real_t *f, const int size)
+{
+	FILE *fp;
+	fp = fopen(filename, "w");
+	if (fp)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size; j++)
+			{
+				fprintf(fp, "%f\t", m[j * size + i]);
+
+			}
+			if (f != NULL)
+				fprintf(fp, "%f\n", f[i]);
+		}
+		fclose(fp);
+	}
+};
+
