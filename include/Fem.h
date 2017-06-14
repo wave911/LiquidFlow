@@ -38,23 +38,44 @@ class CFemLocalLinear2D : public CFem
 
 	public:
 		CFemLocalLinear2D(CMesh *mesh);
-		~CFemLocalLinear2D();
+		virtual ~CFemLocalLinear2D();
 		virtual void init(CProblem *pr);
-		virtual std::vector<real_t> getLocalCoordinates(const int element, 
-													  const CPoint3D p);		
-		virtual real_t getdNdX(const int idxN, const int element);
-		virtual real_t getdNdY(const int idxN, const int element);
 		virtual void assembleKMatrix();
 		virtual void assembleRightVector(const int timestep);
 		virtual void setBorderConditions(const int timestep);
 		virtual void perform(const int timesteps);
 		real_t getSquare(const int element);
 	protected:
+		virtual std::vector<real_t> getLocalCoordinates(const int element,
+													  const CPoint3D p);
+		virtual real_t getdNdX(const int idxN, const int element);
+		virtual real_t getdNdY(const int idxN, const int element);
 		virtual real_t getdKsidX(const int idx, const int element);
 		virtual real_t getdKsidY(const int idx, const int element);
 		virtual real_t getdNdKsi(const int idxN, const int idxKsi);
 		virtual real_t getdUdX(const int element, const int dim);
 		virtual real_t getdUdY(const int element, const int dim);
+};
+
+class CFemLocalQuad2D : public CFemLocalLinear2D
+{
+	private:
+		CMesh *m_mesh;
+		CProblem *m_pr;
+		real_t *m_K,
+			   *m_C,
+			   *m_F,
+			   *m_U_temp;
+	public:
+		CFemLocalQuad2D(CMesh *mesh);
+		virtual ~CFemLocalQuad2D();
+	protected:
+		virtual std::vector<real_t> getLocalCoordinates(const int element,
+													  const CPoint3D p);
+		virtual real_t getdNdX(const int idxN, const int element);
+		virtual real_t getdNdY(const int idxN, const int element);
+		virtual real_t getdNdKsi(const int idxN, const int idxKsi,
+											const std::vector<real_t> ksi);
 };
 
 class CFemLocalLinear3D : public CFem
