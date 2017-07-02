@@ -69,6 +69,7 @@ class CFemLocalQuad2D : public CFemLocalLinear2D
 	public:
 		CFemLocalQuad2D(CMesh *mesh);
 		virtual ~CFemLocalQuad2D();
+		void test();
 	protected:
 		virtual std::vector<real_t> getLocalCoordinates(const int element,
 													  const CPoint3D p);

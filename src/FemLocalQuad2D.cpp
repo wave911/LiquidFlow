@@ -139,7 +139,9 @@ real_t CFemLocalQuad2D::getdNdKsi(const int idxN, const int idxKsi, const std::v
 			else if (idxKsi == 2)
 				return 4 * ksi[0];
 			break;
-		default:
-			return 0;
 	}
+}
+
+void CFemLocalQuad2D::test() {
+
 }

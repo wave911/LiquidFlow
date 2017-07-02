@@ -110,6 +110,10 @@ bool CSalomeMesh::isBorderPoint(const int idx) {
 		return false;
 }
 
+int CSalomeMesh::getPointsNumberPerElement() {
+	return getElementByIndex(0).size();
+}
+
 std::set<int> CSalomeMesh::getBorderPoints() {
 	return m_borderPoints;
 }

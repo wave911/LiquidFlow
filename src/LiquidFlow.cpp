@@ -45,17 +45,27 @@ int main()
 		Iterations = 0,
 		SolverType = 0,
 		MeshType = 0;
+	string MeshFileName;
 	real_t Tau = 0;
 
 	Re = std::stoi(cfp.getParameter("^Re=(\\S+)"));
 	Tau = std::stof(cfp.getParameter("^Tau=(\\S+)"));
 	Iterations = std::stoi(cfp.getParameter("^Iterations=(\\S+)"));
 	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
-	MeshType = std::stoi(cfp.getParameter("^MeshType=(\\S+)"));
+	MeshFileName = cfp.getParameter("^MeshFile=(\\S+)");
 
-	CMesh *mesh = new CSalomeMesh("../mesh/Mesh_1_2D.dat");
+	CMesh *mesh = new CSalomeMesh(MeshFileName);
 	mesh->Init(MeshGeometryType::G2D);
-	CFem *fem = new CFemLocalLinear2D(mesh);
+	CFem *fem = nullptr;
+	cout << mesh->getPointsNumberPerElement() << endl;
+	if (mesh->getPointsNumberPerElement() == 3) {
+		fem = new CFemLocalLinear2D(mesh);
+		cout << "Linear" << endl;
+	}
+	if (mesh->getPointsNumberPerElement() == 6) {
+		fem = new CFemLocalQuad2D(mesh);
+		cout << "Quadratic" << endl;
+	}
 	CProblem *pr = new CProblem2DCircle(mesh);
 	pr->setRe(1.0);
 	pr->setTau(Tau);

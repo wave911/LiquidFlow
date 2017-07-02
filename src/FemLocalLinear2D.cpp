@@ -191,30 +191,31 @@ void CFemLocalLinear2D::assembleKMatrix() {
 			std::vector<int> element = m_mesh->getElementByIndex(i);
 			for (int g_col = 0; g_col < element.size(); g_col++) {
 				for (int g_row = 0; g_row < element.size(); g_row++) {
-					int pivot = (m_mesh->getPointsNumber() * n * n) * element[g_col] + n * element[g_row];
 					for (int l_col = 0; l_col < n; l_col++) {
 						for (int l_row = 0; l_row < n; l_row++) {
-							int idx = (element[g_row] * n + l_row) * n * m_mesh->getPointsNumber() + element[g_col] * n + l_col;
+							int idx = (element[g_col] * n + l_col) * n * m_mesh->getPointsNumber() + element[g_row] * n + l_row;
 
 							if (l_col == l_row) {
-								if (g_col == g_row)
-									cc = getSquare(i)/6;
-								else
-									cc = getSquare(i)/12;
+								if (l_row < n - 1) {
+									if (g_col == g_row)
+										cc = getSquare(i)/6;
+									else
+										cc = getSquare(i)/12;
+								}
 								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
-								kk = kk * getSquare(i)/12;
-								if (g_row < n - 1)
+								kk = kk * getSquare(i);
+								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
 							}
 							else {
 								if ((2 == l_col) && (0 == l_row))
-									kk = getdNdX(g_row, i) * getSquare(i)/3;
+									kk = getdNdX(g_col, i) * getSquare(i)/6;
 								if ((2 == l_col) && (1 == l_row))
-									kk = getdNdY(g_row, i) * getSquare(i)/3;
+									kk = getdNdY(g_col, i) * getSquare(i)/6;
+								cc = 0;
 							}
 
-							int g_idx = pivot + l_col * m_mesh->getPointsNumber() * n + l_row;
-							m_K[idx] += (kk + cc)/m_pr->getTau();
+							m_K[idx] += kk + cc/m_pr->getTau();
 							m_C[idx] += cc;
 							kk = 0;
 							cc = 0;
@@ -228,7 +229,6 @@ void CFemLocalLinear2D::assembleKMatrix() {
 
 void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 	const int n = 3;
-	real_t ff1 = 0, ff2 = 0, ff3 = 0;
 	int elnumber = m_mesh->getElementsNumber();
 	int ptnumber = m_mesh->getPointsNumber();
 
@@ -238,9 +238,9 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
 
-			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/3);
-			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/3);
-			m_F[element[j] * n + 2] += -2 * (getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/6);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/6);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/6);
+			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/3);
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
 			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
@@ -258,7 +258,6 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 		   beta = 1;
 
 	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0], incx, beta, &m_F[0], incy);
-
 }
 
 void CFemLocalLinear2D::setBorderConditions(const int timestep) {
@@ -297,10 +296,12 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	int count = m_mesh->getPointsNumber();
 
 	this->assembleKMatrix();
+	printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
 	 	this->setBorderConditions(step);
+	 	printMatrix2File("k_matrix_bc.txt", m_K, m_F, count * n);
 	 	dgesv(count * n, m_K, m_F);
 	 	m_pr->setU(m_F);
 	 	memset(m_F, 0, count * n * sizeof(real_t));
