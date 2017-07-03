@@ -42,6 +42,7 @@ void CFemLocalLinear2D::init(CProblem *pr) {
 
 	m_pr = pr;
 	m_pr->init();
+	cout << " TAU1 " << m_pr->getTau() << endl;
 }
 
 std::vector<real_t> CFemLocalLinear2D::getLocalCoordinates(const int element,
@@ -266,9 +267,9 @@ void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
 	for (auto const& i : borderPoints) {
-		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, 0);
-		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, 0);
-		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, 0);
+		m_F[i * n + 0] = 100;//m_pr->getBorderCondition(i, 0, 0);
+		m_F[i * n + 1] = 100;//m_pr->getBorderCondition(i, 1, 0);
+		m_F[i * n + 2] = 100;//m_pr->getBorderCondition(i, 2, 0);
 
 		for (int k = 0; k < ptnumber; k++) {
 			for (int ii = 0; ii < n; ii++) {
@@ -301,7 +302,7 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
 	 	this->setBorderConditions(step);
-	 	printMatrix2File("k_matrix_bc.txt", m_K, m_F, count * n);
+	 	printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	 	dgesv(count * n, m_K, m_F);
 	 	m_pr->setU(m_F);
 	 	memset(m_F, 0, count * n * sizeof(real_t));
@@ -312,4 +313,8 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
 		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
 	}
+}
+
+real_t CFemLocalLinear2D::integrate(int elem_idx, const int ksi1, const int ksi2, const int ksi3) {
+	return (fact(ksi1) * fact(ksi2) * fact(ksi3) * getSquare(elem_idx))/fact(ksi1 + ksi2 + ksi3 + 2);
 }

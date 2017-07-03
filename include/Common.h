@@ -25,5 +25,6 @@ class CConfigFileParser
 void dump2binfile(const real_t *buf, const int count, const char *filename);
 void binfile2data(real_t *buf, const int count, const char *filename);
 void printMatrix2File(const char *filename, const real_t *m, const real_t *f, const int size);
+inline real_t fact(int n) {return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;}
 
 #endif //COMMON_H_

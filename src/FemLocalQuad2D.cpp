@@ -16,14 +16,14 @@ CFemLocalQuad2D::CFemLocalQuad2D(CMesh *mesh) : CFemLocalLinear2D(mesh) {
 }
 
 CFemLocalQuad2D::~CFemLocalQuad2D() {
-	if (this->m_K != nullptr)
-		delete [] this->m_K;
-	if (this->m_C != nullptr)
-		delete [] this->m_C;
-	if (this->m_F != nullptr)
-		delete [] this->m_F;
-	if (this->m_U_temp != nullptr)
-		delete [] this->m_U_temp;
+//	if (this->m_K != nullptr)
+//		delete [] this->m_K;
+//	if (this->m_C != nullptr)
+//		delete [] this->m_C;
+//	if (this->m_F != nullptr)
+//		delete [] this->m_F;
+//	if (this->m_U_temp != nullptr)
+//		delete [] this->m_U_temp;
 }
 
 std::vector<real_t> CFemLocalQuad2D::getLocalCoordinates(const int element,
@@ -142,6 +142,83 @@ real_t CFemLocalQuad2D::getdNdKsi(const int idxN, const int idxKsi, const std::v
 	}
 }
 
-void CFemLocalQuad2D::test() {
+void CFemLocalQuad2D::assembleKMatrix() {
+	const int n = 3;
+	real_t cc = 0,
+		   kk = 0;
 
+	int elementsNum = m_mesh->getElementsNumber();
+	if (elementsNum > 0) {
+		for (int i = 0; i < elementsNum; i++) {
+			std::vector<int> element = m_mesh->getElementByIndex(i);
+			for (int g_col = 0; g_col < element.size(); g_col++) {
+				for (int g_row = 0; g_row < element.size(); g_row++) {
+					for (int l_col = 0; l_col < n; l_col++) {
+						for (int l_row = 0; l_row < n; l_row++) {
+							int idx = (element[g_col] * n + l_col) * n * m_mesh->getPointsNumber() + element[g_row] * n + l_row;
+
+							if (l_col == l_row) {
+								if (l_row < n - 1) {
+									if (g_col == g_row)
+										cc = getSquare(i)/6;
+									else
+										cc = getSquare(i)/12;
+								}
+								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
+								kk = kk * getSquare(i);
+								if (l_row < n - 1)
+									kk = kk/m_pr->getRe();
+							}
+							else {
+								if ((2 == l_col) && (0 == l_row))
+									kk = getdNdX(g_col, i) * getSquare(i)/6;
+								if ((2 == l_col) && (1 == l_row))
+									kk = getdNdY(g_col, i) * getSquare(i)/6;
+								cc = 0;
+							}
+
+							m_K[idx] += kk + cc/m_pr->getTau();
+							m_C[idx] += cc;
+							kk = 0;
+							cc = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CFemLocalQuad2D::assembleRightVector(const int timestep) {
+	const int n = 3;
+	int elnumber = m_mesh->getElementsNumber();
+	int ptnumber = m_mesh->getPointsNumber();
+
+	for (int i = 0; i < elnumber; i++) {
+		std::vector<int> element = m_mesh->getElementByIndex(i);
+		for (int j = 0; j < element.size(); j++) {
+			real_t U1 = m_pr->getU(element[j], 0);
+			real_t U2 = m_pr->getU(element[j], 1);
+
+			m_F[element[j] * n + 0] = getdUdX(i, 0);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/6);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/6);
+			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/3);
+
+			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
+			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
+			m_U_temp[element[j] * n + 2] = 0;
+		}
+	}
+
+	char *ch = "N";
+	int m_m = m_mesh->getPointsNumber() * n,
+		m_n = m_mesh->getPointsNumber() * n,
+		lda = m_mesh->getPointsNumber() * n,
+		incx = 1,
+		incy = 1;
+	real_t tau = 1/m_pr->getTau(),
+		   beta = 1;
+
+	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0], incx, beta, &m_F[0], incy);
 }
