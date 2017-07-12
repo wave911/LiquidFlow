@@ -51,7 +51,6 @@ int main()
 	Re = std::stoi(cfp.getParameter("^Re=(\\S+)"));
 	Tau = std::stof(cfp.getParameter("^Tau=(\\S+)"));
 	Iterations = std::stoi(cfp.getParameter("^Iterations=(\\S+)"));
-	SolverType = std::stoi(cfp.getParameter("^SolverType=(\\S+)"));
 	MeshFileName = cfp.getParameter("^MeshFile=(\\S+)");
 
 	CMesh *mesh = new CSalomeMesh(MeshFileName);

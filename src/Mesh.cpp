@@ -91,7 +91,7 @@ std::vector<CPoint3D> CSalomeMesh::getPoints() {
 	return m_points;
 }
 
-std::map<int,std::vector<int>> CSalomeMesh::getElements() {
+std::map<int,std::vector<int> > CSalomeMesh::getElements() {
 	return m_mesh;
 }
 
@@ -118,7 +118,7 @@ std::set<int> CSalomeMesh::getBorderPoints() {
 	return m_borderPoints;
 }
 
-void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int>>& aMap) {
+void CSalomeMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int> >& aMap) {
 	vector<int> temp;
 	for (int i = 2; i < tokens.size(); i++) { 
 		if (trim(tokens[i]).length() != 0) {

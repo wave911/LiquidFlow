@@ -1,0 +1,25 @@
+SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp Problem.cpp FemLocalLinear2D.cpp FemLocalQuad2D.cpp FemLocalLinear3D.cpp
+
+RM = rm -f
+CC = clang++
+PROG = liquidflow
+DEFINES = APPLE
+CFLAGS = -std=gnu++11 -stdlib=libc++
+INCS = 	 -I../include
+#LDFLAGS = -lm
+#LIBS_DIRS = -L/usr/lib64 -L../lib
+LIBS = -lm -framework Accelerate
+	
+OBJS = $(SRCS:.cpp=.o)
+
+all: ${PROG}
+
+%.o: %.cpp
+	$(CC) -D$(DEFINES) $(CFLAGS) -c $(INCS) $<
+
+${PROG}: ${OBJS}
+	$(CC) -D$(DEFINES) $(CFLAGS) $(LIBS_DIRS) $(OBJS) $(LIBS) -o $@
+	cp liquidflow ../bin/liquidflow
+clean:
+	${RM} ${PROG} ${OBJS}
+
