@@ -7,8 +7,14 @@
 #include "Constants.h"
 
 #define CFG_PLENGTH 256
+#ifdef APPLE
+#define CONFIG_FILENAME "/Users/epifanov/Projects/LiquidFlow/bin/cfg.txt"
+#define K_MATRIX_FILENAME "/Users/epifanov/Projects/LiquidFlow/bin/kmatrix.bin"
+#endif
+#ifndef APPLE
 #define CONFIG_FILENAME "cfg.txt"
 #define K_MATRIX_FILENAME "kmatrix.bin"
+#endif
 
 class CConfigFileParser
 {
