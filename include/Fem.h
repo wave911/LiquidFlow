@@ -56,7 +56,9 @@ class CFemLocalLinear2D : public CFem
 		virtual real_t getdNdKsi(const int idxN, const int idxKsi);
 		virtual real_t getdUdX(const int element, const int dim);
 		virtual real_t getdUdY(const int element, const int dim);
-		virtual real_t integrate(int elem_idx, const int ksi1, const int ksi2, const int ksi3);
+		virtual real_t integrateiNjN(const int iN, const int jN, const int element);
+		virtual real_t integrateiNjdN(const int iN, const int jN, const int element);
+		virtual real_t integrateidNjdN(const int iN, const int jN, const int element);
 };
 
 class CFemLocalQuad2D : public CFemLocalLinear2D

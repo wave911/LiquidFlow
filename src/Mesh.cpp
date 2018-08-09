@@ -162,3 +162,147 @@ std::string CSalomeMesh::trim(const std::string &s)
 }
 
 
+CFreeFemMesh::CFreeFemMesh() {
+}
+
+CFreeFemMesh::CFreeFemMesh(const std::string filename) : CMesh() {
+	m_filename = filename;
+	m_pointsNumber = 0;
+	m_elementsNumber = 0;
+	m_borderElementsNumber = 0;
+}
+
+CFreeFemMesh::~CFreeFemMesh() {
+	m_points.clear();
+	m_borderPoints.clear();
+	m_borderElements.clear();
+	m_mesh.clear();
+}
+
+int CFreeFemMesh::Init(MeshGeometryType meshType) {
+	ifstream in_stream;
+	string line;
+    in_stream.open(m_filename);
+
+    std::getline(in_stream, line);
+    std::vector<std::string> tokens = split(line, " ");
+    m_pointsNumber = stoi(tokens[0]);
+    m_elementsNumber = stoi(tokens[1]);
+
+    int idx = 0;
+    while(std::getline(in_stream, line))
+    {
+    	std::vector<std::string> tokens = split(line, " ");
+    	if (idx++ < m_pointsNumber) {
+    		CPoint3D point;
+    		point = CPoint3D(stof(tokens[0]), stof(tokens[1]), 0);
+    		m_points.push_back(point);
+    		if (stoi(tokens[2]) == 1) {
+    			m_borderPoints.insert(idx - 1);
+    		}
+
+    	}
+    	if ( (idx > m_pointsNumber ) && (idx <= (m_pointsNumber + m_elementsNumber) ) ) {
+    		addPoints(tokens, m_mesh);
+
+    	}
+    	if (  idx > (m_pointsNumber + m_elementsNumber)  ) {
+    		addPoints(tokens, m_borderElements);
+
+    	}
+    }
+
+    cout << m_mesh.size() << endl;
+    cout << m_borderElements.size() << endl;
+    cout << m_borderPoints.size() << endl;
+    cout << m_points.size() << endl;
+    in_stream.close();
+}
+
+int CFreeFemMesh::getPointsNumber() {
+	return m_points.size();
+}
+
+int CFreeFemMesh::getElementsNumber() {
+	return m_mesh.size();
+}
+
+int CFreeFemMesh::getBorderElementsNumber() {
+	return m_borderElements.size();
+}
+
+std::vector<CPoint3D> CFreeFemMesh::getPoints() {
+	return m_points;
+}
+
+std::map<int,std::vector<int> > CFreeFemMesh::getElements() {
+	return m_mesh;
+}
+
+std::vector<int> CFreeFemMesh::getElementByIndex(const int idx) {
+	return m_mesh[idx];
+}
+
+CPoint3D CFreeFemMesh::getPointByIndex(const int idx) {
+	return m_points[idx];
+}
+
+bool CFreeFemMesh::isBorderPoint(const int idx) {
+	if (m_borderPoints.count(idx) != 0)
+		return true;
+	else
+		return false;
+}
+
+int CFreeFemMesh::getPointsNumberPerElement() {
+	return getElementByIndex(0).size();
+}
+
+std::set<int> CFreeFemMesh::getBorderPoints() {
+	return m_borderPoints;
+}
+
+void CFreeFemMesh::addPoints(std::vector<std::string>& tokens, std::map<int,std::vector<int> >& aMap) {
+	vector<int> temp;
+	for (int i = 0; i < tokens.size() - 1; i++) {
+		if (trim(tokens[i]).length() != 0) {
+			temp.push_back(stoi(tokens[i]) - 1);
+		}
+	}
+	int index = aMap.size();
+	aMap[index] = temp;
+	temp.clear();
+}
+
+void CFreeFemMesh::createBorderPoints() {
+	for (auto const& x : m_borderElements) {
+		vector<int> pts = x.second;
+		for (auto const& p: pts) {
+			m_borderPoints.insert(p);
+		}
+	}
+}
+
+std::vector<std::string> CFreeFemMesh::split(const std::string& text, const std::string& delims) {
+    std::vector<std::string> tokens;
+    std::size_t start = text.find_first_not_of(delims), end = 0;
+
+    while((end = text.find_first_of(delims, start)) != std::string::npos)
+    {
+        tokens.push_back(text.substr(start, end - start));
+        start = text.find_first_not_of(delims, end);
+    }
+    if(start != std::string::npos)
+        tokens.push_back(text.substr(start));
+
+    return tokens;
+}
+
+std::string CFreeFemMesh::trim(const std::string &s)
+{
+   auto wsfront=std::find_if_not(s.begin(),s.end(),[](int c){return std::isspace(c);});
+   auto wsback=std::find_if_not(s.rbegin(),s.rend(),[](int c){return std::isspace(c);}).base();
+   return (wsback<=wsfront ? std::string() : std::string(wsfront,wsback));
+}
+
+

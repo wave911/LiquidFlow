@@ -198,21 +198,24 @@ void CFemLocalLinear2D::assembleKMatrix() {
 
 							if (l_col == l_row) {
 								if (l_row < n - 1) {
-									if (g_col == g_row)
-										cc = getSquare(i)/6;
-									else
-										cc = getSquare(i)/12;
+									cc = integrateiNjN(g_col, g_row, i);
+//									if (g_col == g_row)
+//										cc = getSquare(i)/6;
+//									else
+//										cc = getSquare(i)/12;
 								}
 								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
-								kk = kk * getSquare(i);
+								kk = kk * integrateidNjdN(g_row, g_col, i); //getSquare(i);
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
 							}
 							else {
 								if ((2 == l_col) && (0 == l_row))
-									kk = getdNdX(g_col, i) * getSquare(i)/3;
+									//kk = getdNdX(g_col, i) * getSquare(i)/3;
+									kk = getdNdX(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								if ((2 == l_col) && (1 == l_row))
-									kk = getdNdY(g_col, i) * getSquare(i)/3;
+									//kk = getdNdY(g_col, i) * getSquare(i)/3;
+									kk = getdNdY(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								cc = 0;
 							}
 
@@ -297,24 +300,42 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	int count = m_mesh->getPointsNumber();
 
 	this->assembleKMatrix();
-	printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
+	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
 	 	this->setBorderConditions(step);
-	 	printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
+	 	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	 	dgesv(count * n, m_K, m_F);
 	 	m_pr->setU(m_F);
 	 	memset(m_F, 0, count * n * sizeof(real_t));
 	 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	}
+	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
-		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
-		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
-		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
+		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
+		//cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
+		cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, 0)) )<<endl;
 	}
 }
 
-real_t CFemLocalLinear2D::integrate(int elem_idx, const int ksi1, const int ksi2, const int ksi3) {
-	return (fact(ksi1) * fact(ksi2) * fact(ksi3) * getSquare(elem_idx))/fact(ksi1 + ksi2 + ksi3 + 2);
+real_t CFemLocalLinear2D::integrateiNjN(const int iN, const int jN, const int elementIdx) {
+
+	if (iN == jN) {
+		return getSquare(elementIdx)/6;
+	}
+	else {
+		return getSquare(elementIdx)/12;
+	}
+	return 0;
+}
+
+real_t CFemLocalLinear2D::integrateiNjdN(const int iN, const int jN, const int elementIdx) {
+
+	return getSquare(elementIdx)/3;
+}
+
+real_t CFemLocalLinear2D::integrateidNjdN(const int iN, const int jN, const int elementIdx) {
+
+	return getSquare(elementIdx);
 }
