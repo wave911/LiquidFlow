@@ -242,9 +242,9 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
 
-			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/3);
-			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/3);
-			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/3);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * integrateiNjdN(0, j, i);//(this->getSquare(i)/3);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * integrateiNjdN(1, j, i);//(this->getSquare(i)/3);
+			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * integrateiNjdN(2, j, i);//(this->getSquare(i)/3);
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
 			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);

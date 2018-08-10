@@ -37,4 +37,21 @@ class CProblem2DCircle : public CProblem {
 		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
 };
 
+class CProblem3DPipe : public CProblem {
+	protected:
+		CMesh *m_mesh;
+		real_t *m_U;
+		real_t constA;
+	public:
+		CProblem3DPipe(CMesh *mesh);
+		CProblem3DPipe(CMesh *mesh, const real_t A);
+		virtual ~CProblem3DPipe();
+		virtual void init();
+		virtual void setU(const int idx, const short dim, const real_t value);
+		virtual void setU(real_t *value);
+		virtual real_t *getU();
+		virtual real_t getU(const int idx, const short dim);
+		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
+};
+
 #endif /* PROBLEM_H_ */

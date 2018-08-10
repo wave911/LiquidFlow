@@ -1,3 +1,5 @@
+Dimension=1
+Problem=0
 Re=1
 Tau=0.01
 Iterations=100
