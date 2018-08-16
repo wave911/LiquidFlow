@@ -96,13 +96,13 @@ void CProblem3DPipe::init() {
 		CPoint3D p = m_mesh->getPointByIndex(i);
 		m_U[i * n + 0] = -p.m_y;
 		m_U[i * n + 1] = p.m_x;
-		m_U[i * n + 1] = constA * p.m_z;
-		m_U[i * n + 2] = 0;
+		m_U[i * n + 2] = constA * p.m_z;
+		m_U[i * n + 3] = 0;
 	}
 }
 
 void CProblem3DPipe::setU(const int idx, const short dim, const real_t value) {
-	int n = 3;
+	int n = 4;
 	m_U[idx * n + dim] = value;
 }
 
@@ -128,9 +128,9 @@ real_t CProblem3DPipe::getBorderCondition(const int idx, const int dim, const re
 		case 1:
 			return p.m_x;
 		case 2:
-			return p.m_z * constA;
+			return constA * time;
 		case 3:
-			return -0.5 * (p.m_x * p.m_x + p.m_y * p.m_y) - constA * p.m_z;
+			return -0.5 * (1 - (p.m_x * p.m_x + p.m_y * p.m_y)) - constA * p.m_z;
 		default:
 			return 0;
 	}

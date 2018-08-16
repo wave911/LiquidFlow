@@ -1,3 +1,5 @@
+import sys
+
 def subfinder(items, pattern):
     res = list(filter(lambda x: x in pattern, items))
     if (len(res) == len(pattern)):
@@ -10,7 +12,14 @@ def subfinder(items, pattern):
 
 #flags.DEFINE_string('mesh_file', '', "mesh file (.data)")
 
-f = open('../mesh/Mesh_box.dat','a+')
+try:
+    mesh_file_name=sys.argv[1]
+    print(mesh_file_name)
+except:
+    print('Please pass mesh_file_name')
+
+#f = open('../mesh/Mesh_box.dat','a+')
+f = open(mesh_file_name,'a+')
 f.seek(0,0)
 pntCount, elemTotalCount = f.readline().split(' ')
 

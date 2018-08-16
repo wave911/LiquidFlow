@@ -1,11 +1,11 @@
 Dimension=1
-Problem=0
+Problem=1
 Re=1
-Tau=0.01
-Iterations=100
+Tau=0.1
+Iterations=10
 SolverType=4
 MeshType=1
-MeshFile=/Users/epifanov/Projects/LiquidFlow/mesh/Mesh_1_lin.dat
+MeshFile=/Users/epifanov/Projects/LiquidFlow/mesh/Mesh_lin_Cylinder_3.dat
 MeshGenType=221
 SingleMeshFilename=D:/Projects/Eclipse/VSLiquidFlow/MeshSubmarine/Mesh_1.dat
 MeshFolder=D:/Projects/Eclipse/VSLiquidFlow/Grid/MovingBrickCircle/

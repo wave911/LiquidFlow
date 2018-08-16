@@ -86,6 +86,7 @@ int main()
 			break;
 		case (int)ProblemType::P3DPipe:
 			pr = new CProblem3DPipe(mesh);
+		cout << "P3DPipe" << endl;
 			break;
 	}
 	pr->setRe(1.0);

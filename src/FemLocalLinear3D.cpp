@@ -188,7 +188,7 @@ real_t CFemLocalLinear3D::getdKsidY(const int idx, const int element) {
 		case 0: //i = 1 j = 2 k = 3  <<
 			zz1 = p4.m_z - p2.m_z;
 			xx1 = p3.m_x - p2.m_x;
-			zz2 = p3.m_y - p2.m_y;
+			zz2 = p3.m_z - p2.m_z;
 			xx2 = p4.m_x - p2.m_x;
 			return (xx1 * zz1 - zz2 * xx2)/(6 * volume);
 		case 1: //i = 2 j = 3 k = 1  <<
@@ -239,7 +239,7 @@ real_t CFemLocalLinear3D::getdKsidZ(const int idx, const int element) {
 			yy1 = p1.m_y - p4.m_y;
 			xx2 = p1.m_x - p4.m_x;
 			yy2 = p2.m_y - p4.m_y;
-			return (xx1 * yy2 - xx2 * yy2)/(6 * volume);
+			return (xx1 * yy1 - xx2 * yy2)/(6 * volume);
 		case 3: //i = 3 j = 1 k = 2  <<
 			xx1 = p1.m_x - p3.m_x;
 			yy1 = p2.m_y - p1.m_y;
@@ -283,7 +283,7 @@ real_t CFemLocalLinear3D::getdUdZ(const int element_idx, const int dim) {
 	real_t res = 0;
 	for (int i = 0; i < element.size(); i++) {
 		real_t U = m_pr->getU(element[i], dim);
-		res += U * getdNdY(i, element_idx);
+		res += U * getdNdZ(i, element_idx);
 	}
 
 	return res;
@@ -308,7 +308,7 @@ void CFemLocalLinear3D::assembleKMatrix() {
 								if (l_row < n - 1) {
 									cc = integrateiNjN(g_col, g_row, i);
 								}
-								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i) * getdNdZ(g_col,i) * getdNdZ(g_row,i);
+								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i) + getdNdZ(g_col,i) * getdNdZ(g_row,i);
 								kk = kk * integrateidNjdN(g_row, g_col, i);
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
@@ -319,7 +319,7 @@ void CFemLocalLinear3D::assembleKMatrix() {
 								if ((n - 1 == l_col) && (1 == l_row))
 									kk = getdNdY(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								if ((n - 1 == l_col) && (2 == l_row))
-									kk = getdNdY(g_col, i) * integrateiNjdN(g_row, g_col, i);
+									kk = getdNdZ(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								cc = 0;
 							}
 
@@ -347,16 +347,19 @@ void CFemLocalLinear3D::assembleRightVector(const int timestep) {
 			real_t U2 = m_pr->getU(element[j], 1);
 			real_t U3 = m_pr->getU(element[j], 2);
 
-			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0) + U3 * getdUdY(i, 0)) * integrateiNjdN(0, j, i);
-			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1) + U3 * getdUdY(i, 1)) * integrateiNjdN(1, j, i);
-			m_F[element[j] * n + 2] += (U1 * getdUdX(i, 2) + U2 * getdUdY(i, 2) + U3 * getdUdY(i, 2)) * integrateiNjdN(2, j, i);
-			m_F[element[j] * n + 3] += -2 * (getdUdY(i, 0) * getdUdX(i, 1) + \
-											 getdUdZ(i, 0) * getdUdX(i, 2) + \
-											 getdUdZ(i, 1) * getdUdY(i, 2)) * integrateiNjdN(3, j, i);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0) + U3 * getdUdZ(i, 0)) * integrateiNjdN(0, j, i);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1) + U3 * getdUdZ(i, 1)) * integrateiNjdN(1, j, i);
+			m_F[element[j] * n + 2] += (U1 * getdUdX(i, 2) + U2 * getdUdY(i, 2) + U3 * getdUdZ(i, 2)) * integrateiNjdN(2, j, i);
+			m_F[element[j] * n + 3] += -2 * (getdUdY(i, 0) * getdUdX(i, 1) + getdUdZ(i, 0) * getdUdX(i, 2) + getdUdZ(i, 1) * getdUdY(i, 2) )  * integrateiNjdN(3, j, i);
 
-			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
-			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
-			m_U_temp[element[j] * n + 2] = m_pr->getU(element[j], 2);
+//			m_F[element[j] * n + 0] = m_pr->getU(element[0], 0) * getdNdY(0, i) + m_pr->getU(element[1], 0) * getdNdY(1, i) + m_pr->getU(element[2], 0) * this->getdNdY(2, i) + m_pr->getU(element[3], 0) * this->getdNdY(3, i);
+//			m_F[element[j] * n + 1] = getdUdY(i, 0);
+//			m_F[element[j] * n + 2] += (U1 * getdUdX(i, 2) + U2 * getdUdY(i, 2) + U3 * getdUdZ(i, 2));
+//			m_F[element[j] * n + 3] += U1 * 0 + U2 * 0 + U3 * 1;
+
+			m_U_temp[element[j] * n + 0] = U1;
+			m_U_temp[element[j] * n + 1] = U2;
+			m_U_temp[element[j] * n + 2] = U3;
 			m_U_temp[element[j] * n + 3] = 0;
 		}
 	}
@@ -381,7 +384,7 @@ void CFemLocalLinear3D::setBorderConditions(const int timestep) {
 	for (auto const& i : borderPoints) {
 		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, 0);
 		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, 0);
-		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, 0);
+		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, (timestep - 1) * m_pr->getTau());
 		m_F[i * n + 3] = m_pr->getBorderCondition(i, 3, 0);
 
 		for (int k = 0; k < ptnumber; k++) {
@@ -407,28 +410,28 @@ void CFemLocalLinear3D::setBorderConditions(const int timestep) {
 
 void CFemLocalLinear3D::perform(const int timesteps) {
 	int n = 4;
-		int count = m_mesh->getPointsNumber();
+	int count = m_mesh->getPointsNumber();
 
-		this->assembleKMatrix();
+	this->assembleKMatrix();
+	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
+	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
+	for (int step = 1; step < timesteps; step++) {
+		this->assembleRightVector(step);
+		this->setBorderConditions(step);
 		//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
-		dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
-		for (int step = 1; step < timesteps; step++) {
-		 	this->assembleRightVector(step);
-		 	this->setBorderConditions(step);
-		 	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
-		 	dgesv(count * n, m_K, m_F);
-		 	m_pr->setU(m_F);
-		 	memset(m_F, 0, count * n * sizeof(real_t));
-		 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
-		}
-		cout << "number of points = " << count << endl;
-		for (int i = 0; i < count; i++) {
-			cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
-			cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
-			cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0) <<endl;
-			cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, 0) <<endl;
-			//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, 0)) )<<endl;
-		}
+		dgesv(count * n, m_K, m_F);
+		m_pr->setU(m_F);
+		memset(m_F, 0, count * n * sizeof(real_t));
+		binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
+	}
+	cout << "number of points = " << count << endl;
+	for (int i = 0; i < count; i++) {
+		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
+		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
+		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, 0) <<endl;
+		//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, 0)) )<<endl;
+	}
 }
 
 void CFemLocalLinear3D::init(CProblem *pr) {
@@ -456,7 +459,6 @@ real_t CFemLocalLinear3D::integrateiNjN(const int iN, const int jN, const int el
 	else {
 		return getVolume(element, 0)/20;
 	}
-	return 0;
 }
 real_t CFemLocalLinear3D::integrateiNjdN(const int iN, const int jN, const int element) {
 	return getVolume(element, 0)/4;
