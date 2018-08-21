@@ -199,22 +199,16 @@ void CFemLocalLinear2D::assembleKMatrix() {
 							if (l_col == l_row) {
 								if (l_row < n - 1) {
 									cc = integrateiNjN(g_col, g_row, i);
-//									if (g_col == g_row)
-//										cc = getSquare(i)/6;
-//									else
-//										cc = getSquare(i)/12;
 								}
 								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
-								kk = kk * integrateidNjdN(g_row, g_col, i); //getSquare(i);
+								kk = kk * integrateidNjdN(g_row, g_col, i);
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
 							}
 							else {
 								if ((2 == l_col) && (0 == l_row))
-									//kk = getdNdX(g_col, i) * getSquare(i)/3;
 									kk = getdNdX(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								if ((2 == l_col) && (1 == l_row))
-									//kk = getdNdY(g_col, i) * getSquare(i)/3;
 									kk = getdNdY(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								cc = 0;
 							}
@@ -242,9 +236,9 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
 
-			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * integrateiNjdN(0, j, i);//(this->getSquare(i)/3);
-			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * integrateiNjdN(1, j, i);//(this->getSquare(i)/3);
-			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * integrateiNjdN(2, j, i);//(this->getSquare(i)/3);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * integrateiNjdN(0, j, i);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * integrateiNjdN(1, j, i);
+			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * integrateiNjdN(2, j, i);
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
 			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
@@ -270,9 +264,9 @@ void CFemLocalLinear2D::setBorderConditions(const int timestep) {
 	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
 	for (auto const& i : borderPoints) {
-		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, 0);
-		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, 0);
-		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, 0);
+		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, (timestep) * m_pr->getTau());
+		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, (timestep) * m_pr->getTau());
+		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, (timestep) * m_pr->getTau());
 
 		for (int k = 0; k < ptnumber; k++) {
 			for (int ii = 0; ii < n; ii++) {
@@ -315,7 +309,7 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	for (int i = 0; i < count; i++) {
 		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
 		//cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
-		cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, 0)) )<<endl;
+		cout << abs(abs(m_pr->getU(i, 0)) - abs(m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau())) )<<endl;
 	}
 }
 

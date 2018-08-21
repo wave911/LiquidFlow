@@ -82,10 +82,13 @@ class CFemLocalQuad2D : public CFemLocalLinear2D
 													  const CPoint3D p);
 		virtual real_t getdNdX(const int idxN, const int element);
 		virtual real_t getdNdY(const int idxN, const int element);
-		virtual real_t getdNdKsi(const int idxN, const int idxKsi,
-											const std::vector<real_t> ksi);
+		//virtual real_t getdNdKsi(const int idxN, const int idxKsi,
+		//									const std::vector<real_t> ksi);
 		virtual void assembleKMatrix();
 		virtual void assembleRightVector(const int timestep);
+		virtual real_t integrateiNjN(const int iN, const int jN, const int element);
+		virtual real_t integrateiNjdN(const int iN, const int jN, const int element);
+		virtual real_t integrateidNjdN(const int iN, const int jN, const int element);
 };
 
 class CFemLocalLinear3D : public CFem

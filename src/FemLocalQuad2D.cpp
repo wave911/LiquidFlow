@@ -71,76 +71,132 @@ std::vector<real_t> CFemLocalQuad2D::getLocalCoordinates(const int element,
 	return res;
 }
 
+//real_t CFemLocalQuad2D::getdNdX(const int idxN, const int element) {
+//	real_t sum = 0;
+//	std::vector<int> e = m_mesh->getElementByIndex(element);
+//	CPoint3D p = m_mesh->getPointByIndex(e[idxN]);
+//	std::vector<real_t> ksi = this->getLocalCoordinates(element, p);
+//
+//	for (int i = 0; i < ksi.size(); i++) {
+//		sum += getdNdKsi(idxN, i, ksi) * getdKsidX(i, element);
+//	}
+//	return sum;
+//}
+
 real_t CFemLocalQuad2D::getdNdX(const int idxN, const int element) {
-	real_t sum = 0;
-	std::vector<int> e = m_mesh->getElementByIndex(element);
-	CPoint3D p = m_mesh->getPointByIndex(e[idxN]);
-	std::vector<real_t> ksi = this->getLocalCoordinates(element, p);
+	vector<int> points = m_mesh->getElementByIndex(element);
+	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
+	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
+	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
+	std::vector<real_t> ksi = this->getLocalCoordinates(element, m_mesh->getPointByIndex(points[idxN]));
 
-	for (int i = 0; i < 3; i++) {
-		sum += getdNdKsi(idxN, i, ksi) * getdKsidX(i, element);
-	}
-	return sum;
-}
+	real_t J2 = (p2.m_x - p1.m_x) * (p3.m_y - p1.m_y) - (p1.m_y - p2.m_y) * (p1.m_x - p3.m_x),
+		 Jy23 = p2.m_y - p3.m_y,
+		 Jy31 = p3.m_y - p1.m_y,
+		 Jy12 = p1.m_y - p2.m_y;
 
-real_t CFemLocalQuad2D::getdNdY(const int idxN, const int element) {
-	real_t sum = 0;
-	std::vector<int> e = m_mesh->getElementByIndex(element);
-	CPoint3D p = m_mesh->getPointByIndex(e[idxN]);
-	std::vector<real_t> ksi = this->getLocalCoordinates(element, p);
-
-	for (int i = 0; i < 3; i++) {
-		sum += getdNdKsi(idxN, i, ksi) * getdKsidY(i, element);
-	}
-	return sum;
-}
-
-real_t CFemLocalQuad2D::getdNdKsi(const int idxN, const int idxKsi, const std::vector<real_t> ksi) {
 	switch(idxN) {
 		case 0:
-			if (idxKsi == 0)
-				return 4 * ksi[0] - 1;
-			else
-				return 0;
-			break;
+			return (4 * ksi[0] - 1) * Jy23/J2;
 		case 1:
-			if (idxKsi == 1)
-				return 4 * ksi[1] - 1;
-			else
-				return 0;
-			break;
+			return (4 * ksi[1] - 1) * Jy31/J2;
 		case 2:
-			if (idxKsi == 2)
-				return 4 * ksi[2] - 1;
-			else
-				return 0;
-			break;
+			return (4 * ksi[2] - 1) * Jy12/J2;
 		case 3:
-			if (idxKsi == 0)
-				return 4 * ksi[1];
-			else if (idxKsi == 1)
-				return 4 * ksi[0];
-			else if (idxKsi == 2)
-				return 0;
-			break;
+			return 4 * (ksi[1] * Jy23 + ksi[0] * Jy31) / J2;
 		case 4:
-			if (idxKsi == 0)
-				return 0;
-			else if (idxKsi == 1)
-				return 4 * ksi[2];
-			else if (idxKsi == 2)
-				return 4 * ksi[1];
-			break;
+			return 4 * (ksi[2] * Jy31 + ksi[1] * Jy12) / J2;
 		case 5:
-			if (idxKsi == 0)
-				return 4 * ksi[2];
-			else if (idxKsi == 1)
-				return 0;
-			else if (idxKsi == 2)
-				return 4 * ksi[0];
-			break;
+			return 4 * (ksi[0] * Jy12 + ksi[2] * Jy23) / J2;
 	}
 }
+
+//real_t CFemLocalQuad2D::getdNdY(const int idxN, const int element) {
+//	real_t sum = 0;
+//	std::vector<int> e = m_mesh->getElementByIndex(element);
+//	CPoint3D p = m_mesh->getPointByIndex(e[idxN]);
+//	std::vector<real_t> ksi = this->getLocalCoordinates(element, p);
+//
+//	for (int i = 0; i < ksi.size(); i++) {
+//		sum += getdNdKsi(idxN, i, ksi) * getdKsidY(i, element);
+//	}
+//	return sum;
+//}
+
+real_t CFemLocalQuad2D::getdNdY(const int idxN, const int element) {
+	vector<int> points = m_mesh->getElementByIndex(element);
+	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
+	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
+	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
+	std::vector<real_t> ksi = this->getLocalCoordinates(element, m_mesh->getPointByIndex(points[idxN]));
+
+	real_t J2 = (p2.m_x - p1.m_x) * (p3.m_y - p1.m_y) - (p1.m_y - p2.m_y) * (p1.m_x - p3.m_x),
+		 Jx32 = p3.m_x - p2.m_x,
+		 Jx13 = p1.m_x - p3.m_x,
+		 Jx21 = p2.m_x - p1.m_x;
+
+	switch(idxN) {
+		case 0:
+			return (4 * ksi[0] - 1) * Jx32/J2;
+		case 1:
+			return (4 * ksi[1] - 1) * Jx13/J2;
+		case 2:
+			return (4 * ksi[2] - 1) * Jx21/J2;
+		case 3:
+			return 4 * (ksi[1] * Jx32 + ksi[0] * Jx13) / J2;
+		case 4:
+			return 4 * (ksi[2] * Jx13 + ksi[1] * Jx21) / J2;
+		case 5:
+			return 4 * (ksi[0] * Jx21 + ksi[2] * Jx32) / J2;
+	}
+}
+
+//real_t CFemLocalQuad2D::getdNdKsi(const int idxN, const int idxKsi, const std::vector<real_t> ksi) {
+//	switch(idxN) {
+//		case 0:
+//			if (idxKsi == 0)
+//				return 4 * ksi[0] - 1;
+//			else
+//				return 0;
+//			break;
+//		case 1:
+//			if (idxKsi == 1)
+//				return 4 * ksi[1] - 1;
+//			else
+//				return 0;
+//			break;
+//		case 2:
+//			if (idxKsi == 2)
+//				return 4 * ksi[2] - 1;
+//			else
+//				return 0;
+//			break;
+//		case 3:
+//			if (idxKsi == 0)
+//				return 4 * ksi[1];
+//			else if (idxKsi == 1)
+//				return 4 * ksi[0];
+//			else if (idxKsi == 2)
+//				return 0;
+//			break;
+//		case 4:
+//			if (idxKsi == 0)
+//				return 0;
+//			else if (idxKsi == 1)
+//				return 4 * ksi[2];
+//			else if (idxKsi == 2)
+//				return 4 * ksi[1];
+//			break;
+//		case 5:
+//			if (idxKsi == 0)
+//				return 4 * ksi[2];
+//			else if (idxKsi == 1)
+//				return 0;
+//			else if (idxKsi == 2)
+//				return 4 * ksi[0];
+//			break;
+//	}
+//}
 
 void CFemLocalQuad2D::assembleKMatrix() {
 	const int n = 3;
@@ -159,21 +215,18 @@ void CFemLocalQuad2D::assembleKMatrix() {
 
 							if (l_col == l_row) {
 								if (l_row < n - 1) {
-									if (g_col == g_row)
-										cc = getSquare(i)/6;
-									else
-										cc = getSquare(i)/12;
+									cc = integrateiNjN(g_col, g_row, i);
 								}
 								kk = getdNdX(g_col,i) * getdNdX(g_row,i) + getdNdY(g_col,i) * getdNdY(g_row,i);
-								kk = kk * getSquare(i);
+								kk = kk * integrateidNjdN(g_row, g_col, i);
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
 							}
 							else {
 								if ((2 == l_col) && (0 == l_row))
-									kk = getdNdX(g_col, i) * getSquare(i)/6;
+									kk = getdNdX(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								if ((2 == l_col) && (1 == l_row))
-									kk = getdNdY(g_col, i) * getSquare(i)/6;
+									kk = getdNdY(g_col, i) * integrateiNjdN(g_row, g_col, i);
 								cc = 0;
 							}
 
@@ -200,10 +253,9 @@ void CFemLocalQuad2D::assembleRightVector(const int timestep) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
 
-			m_F[element[j] * n + 0] = getdUdX(i, 0);
-			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * (this->getSquare(i)/6);
-			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * (this->getSquare(i)/6);
-			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * (this->getSquare(i)/3);
+			m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0) + U2 * getdUdY(i, 0)) * integrateiNjdN(0, j, i);
+			m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1) + U2 * getdUdY(i, 1)) * integrateiNjdN(1, j, i);
+			m_F[element[j] * n + 2] += -(2 * getdUdY(i, 0) * getdUdX(i, 1)) * integrateiNjdN(2, j, i);
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
 			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
@@ -221,4 +273,157 @@ void CFemLocalQuad2D::assembleRightVector(const int timestep) {
 		   beta = 1;
 
 	dgemv(ch, m_m, m_n, tau, &m_C[0], lda, &m_U_temp[0], incx, beta, &m_F[0], incy);
+}
+
+real_t CFemLocalQuad2D::integrateiNjN(const int iN, const int jN, const int elementIdx) {
+
+	real_t S = getSquare(elementIdx);
+	real_t res = 0;
+
+	switch(iN) {
+		case 0:
+			switch(jN) {
+				case 0:
+					res = S/30;
+					break;
+				case 1:
+					res = -4 * S/45 + S/12;
+					break;
+				case 2:
+					res = -4 * S/45 + S/12;
+					break;
+				case 3:
+					res = 0;
+					break;
+				case 4:
+					res = -S/45;
+					break;
+				case 5:
+					res = 0;
+					break;
+			}
+			break;
+		case 1:
+			switch(jN) {
+				case 0:
+					res = -4 * S/45 + S/12;
+					break;
+				case 1:
+					res = S/30;
+					break;
+				case 2:
+					res = -4 * S/45 + S/12;
+					break;
+				case 3:
+					res = 0;
+					break;
+				case 4:
+					res = 0;
+					break;
+				case 5:
+					res = -S/45;
+					break;
+			}
+			break;
+		case 2:
+			switch(jN) {
+				case 0:
+					res = -4 * S/45 + S/12;
+					break;
+				case 1:
+					res = -4 * S/45 + S/12;
+					break;
+				case 2:
+					res = S/30;
+					break;
+				case 3:
+					res = -S/45;
+					break;
+				case 4:
+					res = 0;
+					break;
+				case 5:
+					res = 0;
+					break;
+			}
+			break;
+		case 3:
+			switch(jN) {
+				case 0:
+					res = 0;
+					break;
+				case 1:
+					res = 0;
+					break;
+				case 2:
+					res = -S/45;
+					break;
+				case 3:
+					res = 8 * S/45;
+					break;
+				case 4:
+					res = 4 * S/45;
+					break;
+				case 5:
+					res = 4 * S/45;
+					break;
+			}
+			break;
+		case 4:
+			switch(jN) {
+				case 0:
+					res = -S/45;
+					break;
+				case 1:
+					res = 0;
+					break;
+				case 2:
+					res = 0;
+					break;
+				case 3:
+					res = 4 * S/45;
+					break;
+				case 4:
+					res = 8 * S/45;
+					break;
+				case 5:
+					res = 4 * S/45;
+					break;
+			}
+			break;
+		case 5:
+			switch(jN) {
+				case 0:
+					res = 0;
+					break;
+				case 1:
+					res = -S/45;
+					break;
+				case 2:
+					res = 0;
+					break;
+				case 3:
+					res = 4 * S/45;
+					break;
+				case 4:
+					res = 4 * S/45;
+					break;
+				case 5:
+					res = 8 * S/45;
+					break;
+			}
+			break;
+	}
+
+	return res;
+}
+
+real_t CFemLocalQuad2D::integrateiNjdN(const int iN, const int jN, const int elementIdx) {
+
+	return getSquare(elementIdx)/3;
+}
+
+real_t CFemLocalQuad2D::integrateidNjdN(const int iN, const int jN, const int elementIdx) {
+
+	return getSquare(elementIdx);
 }

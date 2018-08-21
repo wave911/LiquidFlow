@@ -37,6 +37,25 @@ class CProblem2DCircle : public CProblem {
 		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
 };
 
+class CProblem2DMixer : public CProblem {
+	protected:
+		CMesh *m_mesh;
+		real_t *m_U;
+	public:
+		CProblem2DMixer(CMesh *mesh);
+		virtual ~CProblem2DMixer();
+		virtual void init();
+		virtual void setU(const int idx, const short dim, const real_t value);
+		virtual void setU(real_t *value);
+		virtual real_t *getU();
+		virtual real_t getU(const int idx, const short dim);
+		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
+		virtual real_t eta(const real_t time);
+		virtual real_t fi(const real_t time);
+		virtual real_t dtEta(const real_t time);
+		virtual real_t dtFi(const real_t time);
+};
+
 class CProblem3DPipe : public CProblem {
 	protected:
 		CMesh *m_mesh;

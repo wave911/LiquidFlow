@@ -46,23 +46,33 @@ int main()
 		SolverType = 0,
 		MeshType = 0,
 		Dimension = 0,
-		Problem = 0;
+		Problem = 0,
+		MeshGenerator = 0;
 	string MeshFileName;
 	real_t Tau = 0;
 
 	Dimension = std::stoi(cfp.getParameter("^Dimension=(\\S+)"));
 	Problem = std::stoi(cfp.getParameter("^Problem=(\\S+)"));
+	MeshGenerator = std::stoi(cfp.getParameter("^MeshGenerator=(\\S+)"));
 	Re = std::stoi(cfp.getParameter("^Re=(\\S+)"));
 	Tau = std::stof(cfp.getParameter("^Tau=(\\S+)"));
 	Iterations = std::stoi(cfp.getParameter("^Iterations=(\\S+)"));
 	MeshFileName = cfp.getParameter("^MeshFile=(\\S+)");
 
-	CMesh *mesh = new CSalomeMesh(MeshFileName);
+	CMesh *mesh = nullptr;
+	switch(MeshGenerator) {
+		case (int)MeshGeneratorType::Salome:
+			mesh = new CSalomeMesh(MeshFileName);
+			break;
+		case (int)MeshGeneratorType::FreeFem:
+			mesh = new CFreeFemMesh(MeshFileName);
+			break;
+	};
+
 	mesh->Init((MeshGeometryType)Dimension);
 	CFem *fem = nullptr;
 	CProblem *pr = NULL;
 
-	//cout << mesh->getPointsNumberPerElement() << endl;
 	if (Dimension == (int)MeshGeometryType::G2D) {
 		if (mesh->getPointsNumberPerElement() == 3) {
 			fem = new CFemLocalLinear2D(mesh);
@@ -84,9 +94,11 @@ int main()
 		case (int)ProblemType::P2DCircle:
 			pr = new CProblem2DCircle(mesh);
 			break;
+		case (int)ProblemType::P2DMixer:
+			pr = new CProblem2DMixer(mesh);
+			break;
 		case (int)ProblemType::P3DPipe:
 			pr = new CProblem3DPipe(mesh);
-		cout << "P3DPipe" << endl;
 			break;
 	}
 	pr->setRe(1.0);

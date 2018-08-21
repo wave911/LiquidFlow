@@ -352,11 +352,6 @@ void CFemLocalLinear3D::assembleRightVector(const int timestep) {
 			m_F[element[j] * n + 2] += (U1 * getdUdX(i, 2) + U2 * getdUdY(i, 2) + U3 * getdUdZ(i, 2)) * integrateiNjdN(2, j, i);
 			m_F[element[j] * n + 3] += -2 * (getdUdY(i, 0) * getdUdX(i, 1) + getdUdZ(i, 0) * getdUdX(i, 2) + getdUdZ(i, 1) * getdUdY(i, 2) )  * integrateiNjdN(3, j, i);
 
-//			m_F[element[j] * n + 0] = m_pr->getU(element[0], 0) * getdNdY(0, i) + m_pr->getU(element[1], 0) * getdNdY(1, i) + m_pr->getU(element[2], 0) * this->getdNdY(2, i) + m_pr->getU(element[3], 0) * this->getdNdY(3, i);
-//			m_F[element[j] * n + 1] = getdUdY(i, 0);
-//			m_F[element[j] * n + 2] += (U1 * getdUdX(i, 2) + U2 * getdUdY(i, 2) + U3 * getdUdZ(i, 2));
-//			m_F[element[j] * n + 3] += U1 * 0 + U2 * 0 + U3 * 1;
-
 			m_U_temp[element[j] * n + 0] = U1;
 			m_U_temp[element[j] * n + 1] = U2;
 			m_U_temp[element[j] * n + 2] = U3;
@@ -382,10 +377,10 @@ void CFemLocalLinear3D::setBorderConditions(const int timestep) {
 	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
 	for (auto const& i : borderPoints) {
-		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, 0);
-		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, 0);
+		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, (timestep - 1) * m_pr->getTau());
+		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, (timestep - 1) * m_pr->getTau());
 		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, (timestep - 1) * m_pr->getTau());
-		m_F[i * n + 3] = m_pr->getBorderCondition(i, 3, 0);
+		m_F[i * n + 3] = m_pr->getBorderCondition(i, 3, (timestep - 1) * m_pr->getTau());
 
 		for (int k = 0; k < ptnumber; k++) {
 			for (int ii = 0; ii < n; ii++) {

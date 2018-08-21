@@ -1,4 +1,5 @@
 #include "Problem.h"
+#include <math.h>
 
 real_t CProblem::getRe() {
 	return m_Re;
@@ -69,6 +70,78 @@ real_t CProblem2DCircle::getBorderCondition(const int idx, const int dim, const 
 		default:
 			return 0;
 	}
+}
+
+CProblem2DMixer::CProblem2DMixer(CMesh *mesh) : CProblem() {
+	m_mesh = mesh;
+	m_U = NULL;
+}
+
+CProblem2DMixer::~CProblem2DMixer() {
+	delete [] m_U;
+}
+
+void CProblem2DMixer::init() {
+	int n = 3;
+	int count = m_mesh->getPointsNumber();
+	m_U = new real_t[count * n];
+
+	for (int i = 0; i < count; i++) {
+		CPoint3D p = m_mesh->getPointByIndex(i);
+		m_U[i * n + 0] = -p.m_y;
+		m_U[i * n + 1] = p.m_x;
+		m_U[i * n + 2] = 0;
+	}
+}
+
+void CProblem2DMixer::setU(const int idx, const short dim, const real_t value) {
+	int n = 3;
+	m_U[idx * n + dim] = value;
+}
+
+void CProblem2DMixer::setU(real_t *value) {
+	int n = 3;
+	memcpy(m_U, value, m_mesh->getPointsNumber() * n * sizeof(real_t));
+}
+
+real_t* CProblem2DMixer::getU() {
+	return m_U;
+}
+
+real_t CProblem2DMixer::getU(const int idx, const short dim) {
+	int n = 3;
+	return m_U[idx * n + dim];
+}
+
+real_t CProblem2DMixer::getBorderCondition(const int idx, const int dim, const real_t time) {
+	CPoint3D p = m_mesh->getPointByIndex(idx);
+	switch(dim) {
+		case 0:
+			return -p.m_y+ fi(time);
+		case 1:
+			return p.m_x + eta(time);
+		case 2:
+			return 0.5 * (pow(-p.m_y + fi(time), 2) + pow(p.m_x + eta(time), 2)) - \
+					dtFi(time) * (p.m_x + eta(time)) - dtEta(time) * (-p.m_y + fi(time));
+		default:
+			return 0;
+	}
+}
+
+real_t CProblem2DMixer::eta(const real_t time) {
+	return cosf(time);
+}
+
+real_t CProblem2DMixer::fi(const real_t time) {
+	return sinf(time);
+}
+
+real_t CProblem2DMixer::dtEta(const real_t time) {
+	return -sinf(time);
+}
+
+real_t CProblem2DMixer::dtFi(const real_t time) {
+	return cosf(time);
 }
 
 CProblem3DPipe::CProblem3DPipe(CMesh *mesh) : CProblem() {
