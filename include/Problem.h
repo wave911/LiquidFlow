@@ -73,4 +73,23 @@ class CProblem3DPipe : public CProblem {
 		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
 };
 
+class CProblem3DCubeTest4 : public CProblem3DPipe {
+	protected:
+		CMesh *m_mesh;
+		real_t *m_U;
+		real_t constA;
+		real_t constDelta;
+	public:
+		CProblem3DCubeTest4(CMesh *mesh);
+		CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real_t constDelta);
+		virtual ~CProblem3DCubeTest4();
+		virtual void init();
+		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);
+	private:
+		virtual real_t getV1(const int idx, const real_t time);
+		virtual real_t getV2(const int idx, const real_t time);
+		virtual real_t getV3(const int idx, const real_t time);
+		virtual real_t getP(const int idx, const real_t time);
+};
+
 #endif /* PROBLEM_H_ */

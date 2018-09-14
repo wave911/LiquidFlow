@@ -420,7 +420,145 @@ real_t CFemLocalQuad2D::integrateiNjN(const int iN, const int jN, const int elem
 
 real_t CFemLocalQuad2D::integrateiNjdN(const int iN, const int jN, const int elementIdx) {
 
-	return getSquare(elementIdx)/3;
+	real_t S = getSquare(elementIdx);
+	real_t res = 0;
+
+	switch(iN) {
+		case 0:
+			switch(jN) {
+				case 0:
+					res = S/30;
+					break;
+				case 1:
+					res = -4 * S/45 + S/12;
+					break;
+				case 2:
+					res = -4 * S/45 + S/12;
+					break;
+				case 3:
+					res = 0;
+					break;
+				case 4:
+					res = -S/45;
+					break;
+				case 5:
+					res = 0;
+					break;
+			}
+			break;
+		case 1:
+			switch(jN) {
+				case 0:
+					res = -4 * S/45 + S/12;
+					break;
+				case 1:
+					res = S/30;
+					break;
+				case 2:
+					res = -4 * S/45 + S/12;
+					break;
+				case 3:
+					res = 0;
+					break;
+				case 4:
+					res = 0;
+					break;
+				case 5:
+					res = -S/45;
+					break;
+			}
+			break;
+		case 2:
+			switch(jN) {
+				case 0:
+					res = -4 * S/45 + S/12;
+					break;
+				case 1:
+					res = -4 * S/45 + S/12;
+					break;
+				case 2:
+					res = S/30;
+					break;
+				case 3:
+					res = -S/45;
+					break;
+				case 4:
+					res = 0;
+					break;
+				case 5:
+					res = 0;
+					break;
+			}
+			break;
+		case 3:
+			switch(jN) {
+				case 0:
+					res = 0;
+					break;
+				case 1:
+					res = 0;
+					break;
+				case 2:
+					res = -S/45;
+					break;
+				case 3:
+					res = 8 * S/45;
+					break;
+				case 4:
+					res = 4 * S/45;
+					break;
+				case 5:
+					res = 4 * S/45;
+					break;
+			}
+			break;
+		case 4:
+			switch(jN) {
+				case 0:
+					res = -S/45;
+					break;
+				case 1:
+					res = 0;
+					break;
+				case 2:
+					res = 0;
+					break;
+				case 3:
+					res = 4 * S/45;
+					break;
+				case 4:
+					res = 8 * S/45;
+					break;
+				case 5:
+					res = 4 * S/45;
+					break;
+			}
+			break;
+		case 5:
+			switch(jN) {
+				case 0:
+					res = 3 * S/15;
+					break;
+				case 1:
+					res = -S/45;
+					break;
+				case 2:
+					res = 0;
+					break;
+				case 3:
+					res = 4 * S/45;
+					break;
+				case 4:
+					res = 4 * S/45;
+					break;
+				case 5:
+					res = 8 * S/45;
+					break;
+			}
+			break;
+	}
+
+	return res;
 }
 
 real_t CFemLocalQuad2D::integrateidNjdN(const int iN, const int jN, const int elementIdx) {
