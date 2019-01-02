@@ -7,9 +7,12 @@ class CProblem {
 	protected:
 		real_t m_Re;
 		real_t m_t;
+
+		CMesh *m_mesh;
+		real_t *m_U;
 	public:
 		CProblem() {m_Re = 0; m_t = 0;};
-		virtual ~CProblem() {};
+		virtual ~CProblem() {delete [] m_U;};
 		virtual void init() {};
 		real_t getRe();
 		real_t getTau();
@@ -23,9 +26,9 @@ class CProblem {
 };
 
 class CProblem2DCircle : public CProblem {
-	protected:
-		CMesh *m_mesh;
-		real_t *m_U;
+//	protected:
+//		CMesh *m_mesh;
+//		real_t *m_U;
 	public:
 		CProblem2DCircle(CMesh *mesh);
 		virtual ~CProblem2DCircle();
@@ -38,9 +41,9 @@ class CProblem2DCircle : public CProblem {
 };
 
 class CProblem2DMixer : public CProblem {
-	protected:
-		CMesh *m_mesh;
-		real_t *m_U;
+//	protected:
+//		CMesh *m_mesh;
+//		real_t *m_U;
 	public:
 		CProblem2DMixer(CMesh *mesh);
 		virtual ~CProblem2DMixer();
@@ -58,8 +61,8 @@ class CProblem2DMixer : public CProblem {
 
 class CProblem3DPipe : public CProblem {
 	protected:
-		CMesh *m_mesh;
-		real_t *m_U;
+//		CMesh *m_mesh;
+//		real_t *m_U;
 		real_t constA;
 	public:
 		CProblem3DPipe(CMesh *mesh);
@@ -75,13 +78,13 @@ class CProblem3DPipe : public CProblem {
 
 class CProblem3DCubeTest4 : public CProblem3DPipe {
 	protected:
-		CMesh *m_mesh;
-		real_t *m_U;
-		real_t constA;
+//		CMesh *m_mesh;
+//		real_t *m_U;
+//		real_t constA;
 		real_t constDelta;
 	public:
 		CProblem3DCubeTest4(CMesh *mesh);
-		CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real_t constDelta);
+		CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real_t delta);
 		virtual ~CProblem3DCubeTest4();
 		virtual void init();
 		virtual real_t getBorderCondition(const int idx, const int dim, const real_t time);

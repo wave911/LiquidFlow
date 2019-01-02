@@ -100,6 +100,9 @@ int main()
 		case (int)ProblemType::P3DPipe:
 			pr = new CProblem3DPipe(mesh);
 			break;
+		case (int)ProblemType::P3DTest4:
+			pr = new CProblem3DCubeTest4(mesh);
+			break;
 	}
 	pr->setRe(1.0);
 	pr->setTau(Tau);

@@ -377,10 +377,10 @@ void CFemLocalLinear3D::setBorderConditions(const int timestep) {
 	std::set<int> borderPoints = m_mesh->getBorderPoints();
 
 	for (auto const& i : borderPoints) {
-		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, (timestep - 1) * m_pr->getTau());
-		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, (timestep - 1) * m_pr->getTau());
-		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, (timestep - 1) * m_pr->getTau());
-		m_F[i * n + 3] = m_pr->getBorderCondition(i, 3, (timestep - 1) * m_pr->getTau());
+		m_F[i * n + 0] = m_pr->getBorderCondition(i, 0, (timestep) * m_pr->getTau());
+		m_F[i * n + 1] = m_pr->getBorderCondition(i, 1, (timestep) * m_pr->getTau());
+		m_F[i * n + 2] = m_pr->getBorderCondition(i, 2, (timestep) * m_pr->getTau());
+		m_F[i * n + 3] = m_pr->getBorderCondition(i, 3, (timestep) * m_pr->getTau());
 
 		for (int k = 0; k < ptnumber; k++) {
 			for (int ii = 0; ii < n; ii++) {
@@ -418,14 +418,20 @@ void CFemLocalLinear3D::perform(const int timesteps) {
 		m_pr->setU(m_F);
 		memset(m_F, 0, count * n * sizeof(real_t));
 		binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
-	}
+	//}
 	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
-		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
-		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
+		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
+		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
 		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
-		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, 0) <<endl;
-		//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, 0)) )<<endl;
+		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
+
+//		cout << i * n + 0 << "=" << m_pr->getU(i, 0) - m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
+//		cout << i * n + 1 << "=" << m_pr->getU(i, 1) - m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
+//		cout << i * n + 2 << "=" << m_pr->getU(i, 2) - m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
+//		cout << i * n + 3 << "=" << m_pr->getU(i, 3) - m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
+	}
+	//
 	}
 }
 

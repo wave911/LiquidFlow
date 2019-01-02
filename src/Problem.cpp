@@ -1,6 +1,16 @@
 #include "Problem.h"
 #include <math.h>
 
+#include <iostream>
+using namespace std;
+
+
+double sgn(real_t x) {
+  if (x > 0.0) return 1.0;
+  if (x < 0.0) return -1.0;
+  return x;
+}
+
 real_t CProblem::getRe() {
 	return m_Re;
 }
@@ -23,7 +33,7 @@ CProblem2DCircle::CProblem2DCircle(CMesh *mesh) : CProblem() {
 }
 
 CProblem2DCircle::~CProblem2DCircle() {
-	delete [] m_U;
+	//delete [] m_U;
 }
 
 void CProblem2DCircle::init() {
@@ -78,7 +88,7 @@ CProblem2DMixer::CProblem2DMixer(CMesh *mesh) : CProblem() {
 }
 
 CProblem2DMixer::~CProblem2DMixer() {
-	delete [] m_U;
+	//delete [] m_U;
 }
 
 void CProblem2DMixer::init() {
@@ -157,7 +167,7 @@ CProblem3DPipe::CProblem3DPipe(CMesh *mesh, const real_t A) : CProblem() {
 }
 
 CProblem3DPipe::~CProblem3DPipe() {
-	delete [] m_U;
+	//delete [] m_U;
 }
 
 void CProblem3DPipe::init() {
@@ -209,14 +219,14 @@ real_t CProblem3DPipe::getBorderCondition(const int idx, const int dim, const re
 	}
 }
 
-CProblem3DCubeTest4::CProblem3DCubeTest4(CMesh *mesh) : CProblem() {
+CProblem3DCubeTest4::CProblem3DCubeTest4(CMesh *mesh) : CProblem3DPipe(mesh) {
 	m_mesh = mesh;
 	m_U = NULL;
 	constA = 1;
 	constDelta = pow(10, -6);
 }
 
-CProblem3DCubeTest4::CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real_t delta) : CProblem() {
+CProblem3DCubeTest4::CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real_t delta) : CProblem3DPipe(mesh, A) {
 	m_mesh = mesh;
 	m_U = NULL;
 	constA = A;
@@ -224,14 +234,14 @@ CProblem3DCubeTest4::CProblem3DCubeTest4(CMesh *mesh, const real_t A, const real
 }
 
 CProblem3DCubeTest4::~CProblem3DCubeTest4() {
-	delete [] m_U;
+//	delete [] m_U;
 }
 
 void CProblem3DCubeTest4::init() {
 	int n = 4;
 	int count = m_mesh->getPointsNumber();
 	m_U = new real_t[count * n];
-
+	std::cout << "CProblem3DCubeTest4::init() " << count << std::endl;
 	for (int i = 0; i < count; i++) {
 		CPoint3D p = m_mesh->getPointByIndex(i);
 		m_U[i * n + 0] = -p.m_y;
@@ -263,7 +273,7 @@ real_t CProblem3DCubeTest4::getV1(const int idx, const real_t t) {
 
 	s1 = sin(p.m_z - exp(t) * sin(3 * t)) + (p.m_x + p.m_z - exp(t) * (sin(3 * t) + pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA) ) )) * cos(p.m_y - exp(t) * sin(2 * t));
 	s2 = sin(p.m_x - exp(t) * pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA))) + cos(p.m_x - exp(t) * pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA))) + cos(p.m_z - exp(t) * sin(3 * t));
-	s3 = exp(t) * ((t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - /*sgn*/(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA),2) * cos(1/(abs(t - 0.5) + constA)) );
+	s3 = exp(t) * ((t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - sgn(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA),2) * cos(1/(abs(t - 0.5) + constA)) );
 
 	return exp(-t) * (s1 + s2) + s3;
 }
@@ -292,21 +302,21 @@ real_t CProblem3DCubeTest4::getP(const int idx, const real_t t) {
 
 	s0 = -0.5 * (pow(getV1(idx, t), 2) + pow(getV2(idx, t), 2) + pow(getV3(idx, t), 2));
 	s1 = (p.m_x + p.m_z - exp(t) * (sin(3 * t) + pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA)))) * cos(p.m_y - exp(t) * sin(2 * t)) * \
-				((t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - /*sgn*/(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)));
+				((t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - sgn(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)));
 	s2 = (sin(3 * t) + 3 * cos(3 * t)) * sin(p.m_y - exp(t) * sin(2 * t)) * (p.m_x + p.m_z - exp(t) * (sin(3 * t) + pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA))));
-	s3 = p.m_x * (-exp(t) * sin(1/(abs(t - 0.5) + constA)) * (t * t + 3 * t + 1/4.0) + 2 * constDelta * /*sgn*/(t - 0.5) * (1/pow((abs(t - 0.5) + constA), 2)) * \
+	s3 = p.m_x * (-exp(t) * sin(1/(abs(t - 0.5) + constA)) * (t * t + 3 * t + 1/4.0) + 2 * constDelta * sgn(t - 0.5) * (1/pow((abs(t - 0.5) + constA), 2)) * \
 			cos(1/(abs(t - 0.5) + constA)) * (t * t - 1/4.0 + constA * ( (t - 0.5)/(abs(t - 0.5) + constA) )) + exp(t) * pow((t - 0.5)/(abs(t - 0.5) + constA),2) * \
 			(2 * constDelta * (t - 0.5) * cos(1/(abs(t - 0.5) + constA)) + sin(1/(abs(t - 0.5) + constA)) * (1/pow(abs(t - 0.5) + constA ,2))));
 	s4 = sin(p.m_x - exp(t) * pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA))) * ( (t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - \
-			/*sgn*/(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) + (sin(3 * t) + 3 * cos(3 * t)) * \
+			sgn(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) + (sin(3 * t) + 3 * cos(3 * t)) * \
 			(p.m_y + p.m_z - exp(t) * (sin(2 * t) + sin(3 * t))));
 	s5 = cos(p.m_x - exp(t) * pow(t - 0.5, 2) * sin(1/(abs(t - 0.5) + constA))) * ( (t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - \
-			/*sgn*/(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) - (sin(2 * t) + 2 * cos(2 * t)) * \
+			sgn(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) - (sin(2 * t) + 2 * cos(2 * t)) * \
 			(p.m_y + p.m_z - exp(t) * (sin(2 * t) + sin(3 * t))) ) - p.m_y * exp(t) * (-3 * sin(2 * t) + 4 * cos(2 * t));
 	s6 = (sin(2 * t) + 2 * cos(2 * t)) * (cos(p.m_y - exp(t) * sin(2 * t)) - sin(p.m_y - exp(t) * sin(2 * t))) - \
 			p.m_z * exp(t) * (6 * cos(3 * t) - 8 * sin(3 * t));
 	s7 = (sin(p.m_z - exp(t) * sin(3 * t)) + cos(p.m_z - exp(t) * sin(3 * t))) * ( (t - 0.5) * (t + 1.5) * sin(1/(abs(t - 0.5) + constA)) - \
-			/*sgn*/(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) ) - \
+			sgn(t - 0.5) * pow((t - 0.5)/(abs(t - 0.5) + constA), 2) * cos(1/(abs(t - 0.5) + constA)) ) - \
 			(sin(2 * t) + 2 * cos(2 * t)) * (sin (p.m_z - exp(t) * sin(3 * t)) - cos(p.m_z - exp(t) * sin(3 * t)) );
 	return s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7;
 }
