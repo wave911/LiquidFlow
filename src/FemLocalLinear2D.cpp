@@ -190,7 +190,7 @@ real_t CFemLocalLinear2D::getdUdX(const int element_idx, const int dim, const st
 	std::vector<int> element = m_mesh->getElementByIndex(element_idx);
 	real_t res = 0;
 	for (int i = 0; i < element.size(); i++) {
-		real_t U = m_pr->getU(0, dim);
+		real_t U = m_pr->getU(element[i], dim) * this->getN(i, ksi);
 		res += U * getdNdX(i, element_idx, ksi);
 	}
 
@@ -201,7 +201,7 @@ real_t CFemLocalLinear2D::getdUdY(const int element_idx, const int dim, const st
 	std::vector<int> element = m_mesh->getElementByIndex(element_idx);
 	real_t res = 0;
 	for (int i = 0; i < element.size(); i++) {
-		real_t U = m_pr->getU(element[i], dim);
+		real_t U = m_pr->getU(element[i], dim) * this->getN(i, ksi);;
 		res += U * getdNdY(i, element_idx, ksi);
 	}
 
@@ -379,8 +379,8 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	}
 	cout << "number of points = " << count << endl;
-	//for (int i = 0; i < count; i++) {
-	for (int i = 0; i < m_mesh->getElementsNumber(); i++) {
+	for (int i = 0; i < count; i++) {
+	//for (int i = 0; i < m_mesh->getElementsNumber(); i++) {
 		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
 		//cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
 		cout << abs(abs(m_pr->getU(i, 0)) - abs(m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau())) )<<endl;
