@@ -11,6 +11,15 @@
 
 using namespace std;
 
+CFem::CFem() {
+	m_pr = nullptr;
+	m_U_temp = nullptr;
+	m_mesh = nullptr;
+	m_K = nullptr;
+	m_F = nullptr;
+	m_C = nullptr;
+};
+
 void CFem::dgemv(char *trans, int m, int n, real_t alpha, real_t *a, 
 				   int lda, real_t *x, int incx, real_t beta, real_t *y, int incy) {
 #ifdef LIBBLASLAPACK

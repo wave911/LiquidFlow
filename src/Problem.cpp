@@ -29,7 +29,7 @@ real_t CProblem::setTau(const real_t t) {
 
 CProblem2DCircle::CProblem2DCircle(CMesh *mesh) : CProblem() {
 	m_mesh = mesh;
-	m_U = NULL;
+	m_U = nullptr;
 }
 
 CProblem2DCircle::~CProblem2DCircle() {
