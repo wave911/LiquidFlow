@@ -241,35 +241,38 @@ void CFemLocalLinear2D::assembleKMatrix() {
 							if (l_col == l_row) {
 								if (l_row < n - 1) {
 									if (g_col == g_row)
-										m_C[idx] += getSquare(i)/6;
+										cc = getSquare(i)/6;
 									else
-										m_C[idx] += getSquare(i)/12;
+										cc = getSquare(i)/12;
+								}
+								for (int l = 0; l < gr->m_intpoints; l++) {
+									kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
 								}
 								//m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]));
 								// integration over K matrix element
-								m_K[idx] += m_C[idx]/m_pr->getTau();
 //								if (l_row < n - 1)
 //									kk = kk/m_pr->getRe();
 							}
 							else {
-								if (((n - 1) == l_col) && (l_row < (n - 1)))
-									m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]));
-							}
+//								if (((n - 1) == l_col) && (l_row < (n - 1)))
+//									m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]));
+
 //							for (int l = 0; l < gr->m_intpoints; l++) {
 //								if (l_col == l_row) {
 //									m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * gr->m_wi[l]);
 //								}
 //								else {
-//									if ((2 == l_col) && (0 == l_row))
-//										m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
-//									if ((2 == l_col) && (1 == l_row))
-//										m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+									if ((2 == l_col) && (0 == l_row))
+										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]) * gr->m_wi[0]);
+									if ((2 == l_col) && (1 == l_row))
+										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]) * gr->m_wi[0]);
 //								}
 //								//kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * gr->m_wi[l]);
-//							}
-							//m_K[idx] += kk + cc/m_pr->getTau();
-							//m_K[idx] += m_C[idx]/m_pr->getTau();
-							//m_C[idx] += cc;
+								cc = 0;
+							}
+							m_K[idx] += kk + cc/m_pr->getTau();
+							//m_K[idx] += cc/m_pr->getTau();
+							m_C[idx] += cc;
 							kk = 0;
 							cc = 0;
 						}
@@ -379,7 +382,7 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	int count = m_mesh->getPointsNumber();
 
 	this->assembleKMatrix();
-	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
+	//printMatrix2File("k_matrix_init.txt", m_K, m_F, count * n);
 	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
