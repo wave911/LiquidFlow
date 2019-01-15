@@ -78,10 +78,10 @@ int main()
 			fem = new CFemLocalLinear2D(mesh);
 			cout << "Linear" << endl;
 		}
-//		if (mesh->getPointsNumberPerElement() == 6) {
-//			fem = new CFemLocalQuad2D(mesh);
-//			cout << "Quadratic" << endl;
-//		}
+		if (mesh->getPointsNumberPerElement() == 6) {
+			fem = new CFemLocalQuad2D(mesh);
+			cout << "Quadratic" << endl;
+		}
 	}
 	else {
 //		if (mesh->getPointsNumberPerElement() == 4) {

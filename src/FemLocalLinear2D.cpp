@@ -227,7 +227,7 @@ void CFemLocalLinear2D::assembleKMatrix() {
 	real_t cc = 0,
 		   kk = 0,
 		   alfa = 0;
-	CGaussRule *gr = new CGaussRule(1, MeshGeometryType::G2D);
+	CGaussRule *gr = new CGaussRule(3, MeshGeometryType::G2D);
 	int elementsNum = m_mesh->getElementsNumber();
 	if (elementsNum > 0) {
 		for (int i = 0; i < elementsNum; i++) {
@@ -248,30 +248,19 @@ void CFemLocalLinear2D::assembleKMatrix() {
 								for (int l = 0; l < gr->m_intpoints; l++) {
 									kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
 								}
-								//m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]));
-								// integration over K matrix element
-//								if (l_row < n - 1)
-//									kk = kk/m_pr->getRe();
+								if (l_row < n - 1)
+									kk = kk/m_pr->getRe();
 							}
 							else {
-//								if (((n - 1) == l_col) && (l_row < (n - 1)))
-//									m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]));
-
-//							for (int l = 0; l < gr->m_intpoints; l++) {
-//								if (l_col == l_row) {
-//									m_K[idx] += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * gr->m_wi[l]);
-//								}
-//								else {
+								for (int l = 0; l < gr->m_intpoints; l++) {
 									if ((2 == l_col) && (0 == l_row))
-										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]) * gr->m_wi[0]);
+										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 									if ((2 == l_col) && (1 == l_row))
-										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[0]) * this->getN(g_row, gr->m_p[0]) * gr->m_wi[0]);
-//								}
-//								//kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * gr->m_wi[l]);
+										kk += getSquare(i) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+								}
 								cc = 0;
 							}
 							m_K[idx] += kk + cc/m_pr->getTau();
-							//m_K[idx] += cc/m_pr->getTau();
 							m_C[idx] += cc;
 							kk = 0;
 							cc = 0;
@@ -306,7 +295,7 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 	const int n = 3;
 	int elnumber = m_mesh->getElementsNumber();
 	int ptnumber = m_mesh->getPointsNumber();
-	CGaussRule *gr = new CGaussRule(1, MeshGeometryType::G2D);
+	CGaussRule *gr = new CGaussRule(3, MeshGeometryType::G2D);
 	real_t ff = 0;
 	for (int i = 0; i < elnumber; i++) {
 		std::vector<int> element = m_mesh->getElementByIndex(i);
@@ -314,15 +303,11 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 			real_t U1 = m_pr->getU(element[j], 0);
 			real_t U2 = m_pr->getU(element[j], 1);
 			//integration over RHS
-			//for (int l = 0; l < gr->m_intpoints; l++) {
-				m_F[element[j] * n + 0] += (U1 * getdUdX(i, 0, gr->m_p[0]) + U2 * getdUdY(i, 0, gr->m_p[0])) * getSquare(i)/3;//getSquare(i) * ( getFF(element[j], 0, i, gr->m_p[0]) * getN(0, gr->m_p[0]) * gr->m_wi[0]);
-				m_F[element[j] * n + 1] += (U1 * getdUdX(i, 1, gr->m_p[0]) + U2 * getdUdY(i, 1, gr->m_p[0])) * getSquare(i)/3;//getSquare(i) * ( getFF(element[j], 1, i, gr->m_p[0]) * getN(1, gr->m_p[0]) * gr->m_wi[0]);
-				m_F[element[j] * n + 2] += -2 * getdUdY(i, 0, gr->m_p[0]) * getdUdX(i, 1, gr->m_p[0]) * getSquare(i)/3;//getSquare(i) * ( getFF(element[j], 2, i, gr->m_p[0]) * getN(2, gr->m_p[0]) * gr->m_wi[0] );
-				//m_F[element[j] * n + 2] += getSquare(i) * (-2 * getdUdY(i, 0, {2.0/3.0, 1.0/6.0, 1.0/6.0}) * getdUdX(i, 1, {2.0/3.0, 1.0/6.0, 1.0/6.0}) * this->getN(2, {2.0/3.0, 1.0/6.0, 1.0/6.0})/3 -2 * getdUdY(i, 0, {1.0/6.0, 1.0/6.0, 2.0/3.0}) * getdUdX(i, 1, {1.0/6.0, 1.0/6.0, 2.0/3.0}) * this->getN(2, {1.0/6.0, 1.0/6.0, 2.0/3.0})/3 -2 * getdUdY(i, 0, {1.0/6.0, 2.0/3.0, 1.0/6.0}) * getdUdX(i, 1, {1.0/6.0, 2.0/3.0, 1.0/6.0}) * this->getN(2, {1.0/6.0, 2.0/3.0, 1.0/6.0})/3 );
-			//}
-//			m_F[element[j] * n + 0] += ff;
-//			m_F[element[j] * n + 1] += ff;
-//			m_F[element[j] * n + 2] += ff;
+			for (int l = 0; l < gr->m_intpoints; l++) {
+				m_F[element[j] * n + 0] += getSquare(i) * ( getFF(element[j], 0, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 1] += getSquare(i) * ( getFF(element[j], 1, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 2] += getSquare(i) * ( getFF(element[j], 2, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
+			}
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
 			m_U_temp[element[j] * n + 1] = m_pr->getU(element[j], 1);
@@ -387,7 +372,7 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	for (int step = 1; step < timesteps; step++) {
 	 	this->assembleRightVector(step);
 	 	this->setBorderConditions(step);
-	 	printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
+	 	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	 	dgesv(count * n, m_K, m_F);
 	 	m_pr->setU(m_F);
 	 	memset(m_F, 0, count * n * sizeof(real_t));
@@ -396,9 +381,9 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
 	//for (int i = 0; i < m_mesh->getElementsNumber(); i++) {
-		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) <<endl;
-		//cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, 0) <<endl;
-		cout << abs(abs(m_pr->getU(i, 0)) - abs(m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau())) )<<endl;
+		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) << " " << m_F[i * n + 0] << endl;
+		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0 ) << " " << m_F[i * n + 2] <<endl;
+		//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau())) )<<endl;
 		//out << "points " << m_mesh->getElementByIndex(i)[0] << " " << m_mesh->getElementByIndex(i)[1] << " " << m_mesh->getElementByIndex(i)[2] << endl;
 	}
 }

@@ -87,30 +87,30 @@ class CFemLocalLinear2D : public CFem
 		virtual real_t integrateidNjdN(const int iN, const int jN, const int element);
 };
 
-//class CFemLocalQuad2D : public CFemLocalLinear2D
-//{
-//	public:
-//		CFemLocalQuad2D(CMesh *mesh);
-//		virtual ~CFemLocalQuad2D();
-//		//virtual void init(CProblem *pr);
-//	protected:
-//		virtual std::vector<real_t> getLocalCoordinates(const int element,
-//													  const CPoint3D p);
-//		virtual real_t N(const int idxN, std::vector<real_t> ksi);
+class CFemLocalQuad2D : public CFemLocalLinear2D
+{
+	public:
+		CFemLocalQuad2D(CMesh *mesh);
+		virtual ~CFemLocalQuad2D();
+		//virtual void init(CProblem *pr);
+	protected:
+		virtual std::vector<real_t> getLocalCoordinates(const int element,
+													  const CPoint3D p);
+		virtual real_t getN(const int idxN, std::vector<real_t> ksi);
 //		virtual real_t dNdKsi(const int idxN, const int idxKsi, std::vector<real_t> ksi);
-//
-//		virtual real_t getdNdX(const int idxN, const int element);
-//		virtual real_t getdNdY(const int idxN, const int element);
-//		//virtual real_t getdNdKsi(const int idxN, const int idxKsi,
-//		//									const std::vector<real_t> ksi);
+
+		virtual real_t getdNdX(const int idxN, const int element, std::vector<real_t> ksi);
+		virtual real_t getdNdY(const int idxN, const int element, std::vector<real_t> ksi);
+//		virtual real_t getdNdKsi(const int idxN, const int idxKsi,
+//											const std::vector<real_t> ksi);
 //		virtual real_t getKK(const int idxN, const int jdxN, const int l_col, const int l_row, const int element, const std::vector<real_t> ksi) {return 0;};
 //		virtual real_t getFF(const int idxN, const int l_row, const int element, const std::vector<real_t> ksi) {return 0;};
 //		virtual void assembleKMatrix();
 //		virtual void assembleRightVector(const int timestep);
-//		virtual real_t integrateiNjN(const int iN, const int jN, const int element);
-//		virtual real_t integrateiNjdN(const int iN, const int jN, const int element);
-//		virtual real_t integrateidNjdN(const int iN, const int jN, const int element);
-//};
+		virtual real_t integrateiNjN(const int iN, const int jN, const int element);
+		virtual real_t integrateiNjdN(const int iN, const int jN, const int element);
+		virtual real_t integrateidNjdN(const int iN, const int jN, const int element);
+};
 
 //class CFemLocalLinear3D : public CFem
 //{
