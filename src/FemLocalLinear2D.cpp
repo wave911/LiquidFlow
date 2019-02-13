@@ -134,7 +134,7 @@ real_t CFemLocalLinear2D::getdNdX(const int idxN, const int element, const std::
 
 real_t CFemLocalLinear2D::getdNdY(const int idxN, const int element, const std::vector<real_t> ksi) {
 	real_t sum = 0;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < ksi.size(); i++) {
 		sum += getdNdKsi(idxN, i, ksi) * getdKsidY(i, element);
 	}
 	return sum;
@@ -386,25 +386,4 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 		//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau())) )<<endl;
 		//out << "points " << m_mesh->getElementByIndex(i)[0] << " " << m_mesh->getElementByIndex(i)[1] << " " << m_mesh->getElementByIndex(i)[2] << endl;
 	}
-}
-
-real_t CFemLocalLinear2D::integrateiNjN(const int iN, const int jN, const int elementIdx) {
-
-	if (iN == jN) {
-		return getSquare(elementIdx)/6;
-	}
-	else {
-		return getSquare(elementIdx)/12;
-	}
-	return 0;
-}
-
-real_t CFemLocalLinear2D::integrateiNjdN(const int iN, const int jN, const int elementIdx) {
-
-	return getSquare(elementIdx)/3;
-}
-
-real_t CFemLocalLinear2D::integrateidNjdN(const int iN, const int jN, const int elementIdx) {
-
-	return getSquare(elementIdx);
 }

@@ -84,10 +84,10 @@ int main()
 		}
 	}
 	else {
-//		if (mesh->getPointsNumberPerElement() == 4) {
-//			fem = new CFemLocalLinear3D(mesh);
-//			cout << "Linear" << endl;
-//		}
+		if (mesh->getPointsNumberPerElement() == 4) {
+			fem = new CFemLocalLinear3D(mesh);
+			cout << "Linear" << endl;
+		}
 	}
 
 	switch(Problem) {
