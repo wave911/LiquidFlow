@@ -88,6 +88,10 @@ int main()
 			fem = new CFemLocalLinear3D(mesh);
 			cout << "Linear" << endl;
 		}
+		if (mesh->getPointsNumberPerElement() == 10) {
+			fem = new CFemLocalQuad3D(mesh);
+			cout << "Quadratic" << endl;
+		}
 	}
 
 	switch(Problem) {

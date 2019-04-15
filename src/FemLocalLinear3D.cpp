@@ -351,12 +351,12 @@ void CFemLocalLinear3D::assembleKMatrix() {
 							if (l_col == l_row) {
 								if (l_row < n - 1) {
 									if (g_col == g_row)
-										cc += this->getVolume(i, 0)/10;
+										cc = this->getVolume(i, 0)/10;
 									else
-										cc += this->getVolume(i, 0)/20;
+										cc = this->getVolume(i, 0)/20;
 								}
 								for (int l = 0; l < gr->m_intpoints; l++) {
-									kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
+									kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
 								}
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
@@ -364,11 +364,11 @@ void CFemLocalLinear3D::assembleKMatrix() {
 							else {
 								for (int l = 0; l < gr->m_intpoints; l++) {
 									if ((3 == l_col) && (0 == l_row))
-										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 									if ((3 == l_col) && (1 == l_row))
-										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 									if ((3 == l_col) && (2 == l_row))
-										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 								}
 								cc = 0;
 							}
@@ -500,17 +500,15 @@ void CFemLocalLinear3D::perform(const int timesteps) {
 	}
 	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
-		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
-		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
-		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
-		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
+//		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
+//		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
+//		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
+//		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
 
-//		cout << i * n + 0 << "=" << m_pr->getU(i, 0) - m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
-//		cout << i * n + 1 << "=" << m_pr->getU(i, 1) - m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
-//		cout << i * n + 2 << "=" << m_pr->getU(i, 2) - m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
-//		cout << i * n + 3 << "=" << m_pr->getU(i, 3) - m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
-
-	//
+		cout << i * n + 0 << "=" << m_pr->getU(i, 0) - m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
+		cout << i * n + 1 << "=" << m_pr->getU(i, 1) - m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 2 << "=" << m_pr->getU(i, 2) - m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 3 << "=" << m_pr->getU(i, 3) - m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
 	}
 }
 

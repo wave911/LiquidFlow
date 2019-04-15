@@ -33,6 +33,8 @@ class CFem
 		void dgemv(char *trans, int m, int n, real_t alpha, real_t *a,
 				   int lda, real_t *x, int incx, real_t beta, real_t *y, int incy);
 		void dgesv(int n, real_t *M, real_t *B );
+		void dgemm(char *TransA, char *TransB, int m, int n, int k, real_t alpha, real_t *A, int lda,
+					real_t *B, int ldb, real_t beta, real_t *C, int ldc);
 
 		virtual real_t getKK(const int idxN, const int jdxN, const int l_col, const int l_row, const int element, const std::vector<real_t> ksi) = 0;
 		virtual real_t getFF(const int idxN, const int l_row, const int element, const std::vector<real_t> ksi) = 0;
@@ -140,17 +142,10 @@ class CFemLocalQuad3D : public CFemLocalLinear3D
 	protected:
 		virtual real_t getN(const int idxN, std::vector<real_t> ksi);
 		virtual real_t getdNdKsi(const int idxN, const int idxKsi, std::vector<real_t> ksi);
-//
-//		virtual real_t getdNdX(const int idxN, const int element, std::vector<real_t> ksi);
-//		virtual real_t getdNdY(const int idxN, const int element, std::vector<real_t> ksi);
-//		virtual real_t getdNdZ(const int idxN, const int element, std::vector<real_t> ksi);
-//		virtual real_t getdUdX(const int element, const int dim, std::vector<real_t> ksi);
-//		virtual real_t getdUdY(const int element, const int dim, std::vector<real_t> ksi);
-//		virtual real_t getdUdZ(const int element, const int dim, std::vector<real_t> ksi);
-//		virtual real_t getdKsidX(const int idx, const int element);
-//		virtual real_t getdKsidY(const int idx, const int element);
-//		virtual real_t getdKsidZ(const int idx, const int element);
-		//virtual real_t getdNdKsi(const int idxN, const int idxKsi);
+		std::vector<real_t> getdKsidXYZ(const int dim, const int element, std::vector<real_t> ksi);
+		virtual real_t getdNdX(const int idxN, const int element, std::vector<real_t> ksi);
+		virtual real_t getdNdY(const int idxN, const int element, std::vector<real_t> ksi);
+		virtual real_t getdNdZ(const int idxN, const int element, std::vector<real_t> ksi);
 };
 
 
