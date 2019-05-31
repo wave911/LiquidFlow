@@ -32,13 +32,13 @@ real_t CFemLocalQuad3D::getN(const int idxN, std::vector<real_t> ksi) {
 		res = (2 * ksi[3] - 1) * ksi[3];
 		break;
 	case 4:
-		res = 4 * ksi[1] * ksi[2];
+		res = 4 * ksi[0] * ksi[1];
 		break;
 	case 5:
-		res = 4 * ksi[0] * ksi[2];
+		res = 4 * ksi[1] * ksi[2];
 		break;
 	case 6:
-		res = 4 * ksi[0] * ksi[1];
+		res = 4 * ksi[2] * ksi[1];
 		break;
 	case 7:
 		res = 4 * ksi[0] * ksi[3];
@@ -63,163 +63,87 @@ real_t CFemLocalQuad3D::getdNdKsi(const int idxN, const int idxKsi, const std::v
 
 	switch(idxN) {
 		case 0:
-			switch(idxKsi) {
-				case 0:
-					res = 4 * ksi[0] - 1;
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 0) {
+				res = 4 * ksi[0] - 1;
+				return res;
 			}
 			break;
 		case 1:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 4 * ksi[1] - 1;
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 1) {
+				res = 4 * ksi[1] - 1;
+				return res;
 			}
 			break;
 		case 2:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 4 * ksi[2] - 1;
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 2) {
+				res = 4 * ksi[2] - 1;
+				return res;
 			}
 			break;
 		case 3:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 4 * ksi[3] - 1;
-					break;
+			if (idxKsi == 3) {
+				res = 4 * ksi[3] - 1;
+				return res;
 			}
 			break;
 		case 4:
-			switch(idxKsi) {
-				case 0:
-					res = 4 * ksi[1];
-					break;
-				case 1:
-					res = 4 * ksi[0];
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 0) {
+				res = 4 * ksi[1];
+				return res;
+			}
+			else if (idxKsi == 1) {
+				res = 4 * ksi[0];
+				return res;
 			}
 			break;
 		case 5:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 4 * ksi[2];
-					break;
-				case 2:
-					res = 4 * ksi[1];
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 1) {
+				res = 4 * ksi[2];
+				return res;
+			}
+			else if (idxKsi == 2) {
+				res = 4 * ksi[1];
+				return res;
 			}
 			break;
 		case 6:
-			switch(idxKsi) {
-				case 0:
-					res = 4 * ksi[2];
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 4 * ksi[0];
-					break;
-				case 3:
-					res = 0;
-					break;
+			if (idxKsi == 0) {
+				res = 4 * ksi[2];
+				return res;
+			}
+			else if (idxKsi == 2) {
+				res = 4 * ksi[0];
+				return res;
 			}
 			break;
 		case 7:
-			switch(idxKsi) {
-				case 0:
-					res = 4 * ksi[3];
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 4 * ksi[0];
-					break;
+			if (idxKsi == 0) {
+				res = 4 * ksi[3];
+				return res;
+			}
+			else if (idxKsi == 3) {
+				res = 4 * ksi[0];
+				return res;
 			}
 			break;
 		case 8:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 4 * ksi[3];
-					break;
-				case 2:
-					res = 0;
-					break;
-				case 3:
-					res = 4 * ksi[1];
-					break;
+			if (idxKsi == 1) {
+				res = 4 * ksi[3];
+				return res;
+			}
+			else if (idxKsi == 3) {
+				res = 4 * ksi[1];
+				return res;
 			}
 			break;
 		case 9:
-			switch(idxKsi) {
-				case 0:
-					res = 0;
-					break;
-				case 1:
-					res = 0;
-					break;
-				case 2:
-					res = 4 * ksi[3];
-					break;
-				case 3:
-					res = 4 * ksi[2];
-					break;
+			if (idxKsi == 2) {
+				res = 4 * ksi[3];
+				return res;
+			}
+			else if (idxKsi == 3) {
+				res = 4 * ksi[2];
+				return res;
 			}
 			break;
 		}
@@ -227,37 +151,126 @@ real_t CFemLocalQuad3D::getdNdKsi(const int idxN, const int idxKsi, const std::v
 }
 
 real_t CFemLocalQuad3D::getdNdX(const int idxN, const int element, std::vector<real_t> ksi) {
-	std::vector<real_t> dKsidX = getdKsidXYZ(0, element, ksi);
-	real_t N = 0;
-	real_t sum = 0;
-	for (int i = 0; i < ksi.size(); i++) {
-		sum += getdNdKsi(idxN, i, ksi) * dKsidX[i];
-	}
+	vector<int> points = m_mesh->getElementByIndex(element);
+	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
+	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
+	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
+	CPoint3D p4 = m_mesh->getPointByIndex(points[3]);
+	real_t a1, a2, a3, a4;
 
-	return sum;
+	a1 = p2.m_y * (p4.m_z - p3.m_z) - p3.m_y * (p4.m_z - p2.m_z) + p4.m_y * (p3.m_z - p2.m_z);
+	a2 = -p1.m_y * (p4.m_z - p3.m_z) + 	p3.m_y * (p4.m_z - p1.m_z) - p4.m_y * (p3.m_z - p1.m_z);
+	a3 = p1.m_y * (p4.m_z - p2.m_z) - p2.m_y * (p4.m_z - p1.m_z) + p4.m_y * (p2.m_z - p1.m_z);
+	a4 = -p1.m_y * (p3.m_z - p2.m_z) + p2.m_y * (p3.m_z - p1.m_z) - p3.m_y * (p2.m_z - p1.m_z);
+
+	real_t vol = this->getVolume(element, 0);
+	switch(idxN) {
+		case 0:
+			return (4 * ksi[0] - 1) * a1/vol;
+		case 1:
+			return (4 * ksi[1] - 1) * a2/vol;
+		case 2:
+			return (4 * ksi[2] - 1) * a3/vol;
+		case 3:
+			return (4 * ksi[3] - 1) * a4/vol;
+		case 4:
+			return 4 * (ksi[1] * a1 + ksi[0] * a2) / vol;
+		case 5:
+			return 4 * (ksi[2] * a2 + ksi[1] * a3) / vol;
+		case 6:
+			return 4 * (ksi[2] * a1 + ksi[0] * a3) / vol;
+		case 7:
+			return 4 * (ksi[3] * a1 + ksi[0] * a4) / vol;
+		case 8:
+			return 4 * (ksi[3] * a2 + ksi[1] * a4) / vol;
+		case 9:
+			return 4 * (ksi[3] * a3 + ksi[2] * a4) / vol;
+		default:
+			return 0;
+	}
 }
 
 real_t CFemLocalQuad3D::getdNdY(const int idxN, const int element, std::vector<real_t> ksi) {
-	std::vector<real_t> dKsidY = getdKsidXYZ(1, element, ksi);
-	real_t sum = 0;
-	for (int i = 0; i < ksi.size(); i++) {
-		sum += getdNdKsi(idxN, i, ksi) * dKsidY[i];
-	}
+	vector<int> points = m_mesh->getElementByIndex(element);
+	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
+	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
+	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
+	CPoint3D p4 = m_mesh->getPointByIndex(points[3]);
+	real_t b1, b2, b3, b4;
 
-	return sum;
+	b1 = -p2.m_x * (p4.m_z - p3.m_z) + p3.m_x * (p4.m_z - p2.m_z) - p4.m_x * (p3.m_z - p2.m_z);
+	b2 = p1.m_x * (p4.m_z - p3.m_z) - p3.m_x * (p4.m_z - p1.m_z) + p4.m_x * (p3.m_z - p1.m_z);
+	b3 = -p1.m_x * (p4.m_z - p2.m_z) + p2.m_x * (p4.m_z - p1.m_z) - p4.m_x * (p2.m_z - p1.m_z);
+	b4 = p1.m_x * (p3.m_z - p2.m_z) - p2.m_x * (p3.m_z - p1.m_z) + p3.m_x * (p2.m_z - p1.m_z);
+
+	real_t vol = this->getVolume(element, 0);
+	switch(idxN) {
+		case 0:
+			return (4 * ksi[0] - 1) * b1/vol;
+		case 1:
+			return (4 * ksi[1] - 1) * b2/vol;
+		case 2:
+			return (4 * ksi[2] - 1) * b3/vol;
+		case 3:
+			return (4 * ksi[3] - 1) * b4/vol;
+		case 4:
+			return 4 * (ksi[1] * b1 + ksi[0] * b2) / vol;
+		case 5:
+			return 4 * (ksi[2] * b2 + ksi[1] * b3) / vol;
+		case 6:
+			return 4 * (ksi[2] * b1 + ksi[0] * b3) / vol;
+		case 7:
+			return 4 * (ksi[3] * b1 + ksi[0] * b4) / vol;
+		case 8:
+			return 4 * (ksi[3] * b2 + ksi[1] * b4) / vol;
+		case 9:
+			return 4 * (ksi[3] * b3 + ksi[2] * b4) / vol;
+		default:
+			return 0;
+	}
 }
 
 real_t CFemLocalQuad3D::getdNdZ(const int idxN, const int element, std::vector<real_t> ksi) {
-	std::vector<real_t> dKsidZ = getdKsidXYZ(2, element, ksi);
-	real_t sum = 0;
-	for (int i = 0; i < ksi.size(); i++) {
-		sum += getdNdKsi(idxN, i, ksi) * dKsidZ[i];
+	vector<int> points = m_mesh->getElementByIndex(element);
+	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
+	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
+	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
+	CPoint3D p4 = m_mesh->getPointByIndex(points[3]);
+	real_t c1, c2, c3, c4;
 
+	c1 = p2.m_x * (p4.m_y - p3.m_y) - p3.m_x * (p4.m_y - p2.m_y) + p4.m_x * (p3.m_y - p2.m_y);
+	c2 = -p1.m_x * (p4.m_y - p3.m_y) + p3.m_x * (p4.m_y - p1.m_y) - p4.m_x * (p3.m_y - p1.m_y);
+	c3 = p1.m_x * (p4.m_y - p2.m_y) - p2.m_x * (p4.m_y - p1.m_y) + p4.m_x * (p2.m_y - p1.m_y);
+	c4 = -p1.m_x * (p3.m_y - p2.m_y) + p2.m_x * (p3.m_y - p1.m_y) - p3.m_x * (p2.m_y - p1.m_y);
+
+	real_t vol = this->getVolume(element, 0);
+	switch(idxN) {
+		case 0:
+			return (4 * ksi[0] - 1) * c1/vol;
+		case 1:
+			return (4 * ksi[1] - 1) * c2/vol;
+		case 2:
+			return (4 * ksi[2] - 1) * c3/vol;
+		case 3:
+			return (4 * ksi[3] - 1) * c4/vol;
+		case 4:
+			return 4 * (ksi[1] * c1 + ksi[0] * c2) / vol;
+		case 5:
+			return 4 * (ksi[2] * c2 + ksi[1] * c3) / vol;
+		case 6:
+			return 4 * (ksi[2] * c1 + ksi[0] * c3) / vol;
+		case 7:
+			return 4 * (ksi[3] * c1 + ksi[0] * c4) / vol;
+		case 8:
+			return 4 * (ksi[3] * c2 + ksi[1] * c4) / vol;
+		case 9:
+			return 4 * (ksi[3] * c3 + ksi[2] * c4) / vol;
+		default:
+			return 0;
 	}
-
-	return sum;
 }
 
+/*
 std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int element, std::vector<real_t> ksi) {
 	vector<int> points = m_mesh->getElementByIndex(element);
 	CPoint3D p1 = m_mesh->getPointByIndex(points[0]);
@@ -289,6 +302,24 @@ std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int elemen
 	Jz2 = p2.m_z * (4 * ksi[1] - 1) + 4 * p6.m_z * ksi[2] + 4 * p5.m_z * ksi[0] + 4 * p9.m_z * ksi[3];
 	Jz3 = p3.m_z * (4 * ksi[2] - 1) + 4 * p7.m_z * ksi[0] + 4 * p6.m_z * ksi[1] + 4 * p10.m_z * ksi[3];
 	Jz4 = p4.m_z * (4 * ksi[3] - 1) + 4 * p8.m_z * ksi[0] + 4 * p9.m_z * ksi[1] + 4 * p10.m_z * ksi[2];
+
+	real_t a1, a2, a3, a4,
+		   b1, b2, b3, b4,
+		   c1, c2, c3, c4;
+	a1 = p2.m_y * (p4.m_z - p3.m_z) - p3.m_y * (p4.m_z - p2.m_z) + p4.m_y * (p3.m_z - p2.m_z);
+	a2 = -p1.m_y * (p4.m_z - p3.m_z) + 	p3.m_y * (p4.m_z - p1.m_z) - p4.m_y * (p3.m_z - p1.m_z);
+	a3 = p1.m_y * (p4.m_z - p2.m_z) - p2.m_y * (p4.m_z - p1.m_z) + p4.m_y * (p2.m_z - p1.m_z);
+	a4 = -p1.m_y * (p3.m_z - p2.m_z) + p2.m_y * (p3.m_z - p1.m_z) - p3.m_y * (p2.m_z - p1.m_z);
+
+	b1 = -p2.m_x * (p4.m_z - p3.m_z) + p3.m_x * (p4.m_z - p2.m_z) - p4.m_x * (p3.m_z - p2.m_z);
+	b2 = p1.m_x * (p4.m_z - p3.m_z) - p3.m_x * (p4.m_z - p1.m_z) + p4.m_x * (p3.m_z - p1.m_z);
+	b3 = -p1.m_x * (p4.m_z - p2.m_z) + p2.m_x * (p4.m_z - p1.m_z) - p4.m_x * (p2.m_z - p1.m_z);
+	b4 = p1.m_x * (p3.m_z - p2.m_z) - p2.m_x * (p3.m_z - p1.m_z) + p3.m_x * (p2.m_z - p1.m_z);
+
+	c1 = p2.m_x * (p4.m_y - p3.m_y) - p3.m_x * (p4.m_y - p2.m_y) + p4.m_x * (p3.m_y - p2.m_y);
+	c2 = -p1.m_x * (p4.m_y - p3.m_y) + p3.m_x * (p4.m_y - p1.m_y) - p4.m_x * (p3.m_y - p1.m_y);
+	c3 = p1.m_x * (p4.m_y - p2.m_y) - p2.m_x * (p4.m_y - p1.m_y) + p4.m_x * (p2.m_y - p1.m_y);
+	c4 = -p1.m_x * (p3.m_y - p2.m_y) + p2.m_x * (p3.m_y - p1.m_y) - p3.m_x * (p2.m_y - p1.m_y);
 
 	real_t *matrix = new real_t[9];
 
@@ -555,6 +586,7 @@ std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int elemen
 		   beta = 0;
 	dgemm(ch, ch, m_m, m_n, m_k, alpha, &m1[0], lda, &m2[0], ldb, beta, &c[0], ldc);
 
+	real_t vol = this->getVolume(element, 0);
 	std::vector<real_t> dKsi;
 	int n_start = 0, n_end = 0;
 	switch(dim) {
@@ -572,6 +604,28 @@ std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int elemen
 			break;
 	}
 	for (int i = n_start; i < n_end; i++) {
+		//dKsi.push_back(c[i]);
+		if (n_start == 0) {
+			c[0] = a1/(6 * vol);
+			c[1] = a2/(6 * vol);
+			c[2] = a3/(6 * vol);
+			c[3] = a4/(6 * vol);
+			//cout << "a " << a1 + a2 + a3 + a4 << endl;
+		}
+		if (n_start == 4) {
+			c[4] = b1/(6 * vol);
+			c[5] = b2/(6 * vol);
+			c[6] = b3/(6 * vol);
+			c[7] = b4/(6 * vol);
+			//cout << "b " << b1 + b2 + b3 + b4 << endl;
+		}
+		if (n_start == 8) {
+			c[8] = c1/(6 * vol);
+			c[9] = c2/(6 * vol);
+			c[10] = c3/(6 * vol);
+			c[11] = c4/(6 * vol);
+			//cout << "c " << c1 + c2 + c3 + c4 << endl;
+		}
 		dKsi.push_back(c[i]);
 	}
 
@@ -581,3 +635,4 @@ std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int elemen
 	delete [] matrix;
 	return dKsi;
 }
+*/

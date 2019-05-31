@@ -337,7 +337,7 @@ void CFemLocalLinear3D::assembleKMatrix() {
 	const int n = 4;
 	real_t cc = 0,
 		   kk = 0;
-	CGaussRule *gr = new CGaussRule(1, MeshGeometryType::G3D);
+	CGaussRule *gr = new CGaussRule(3, MeshGeometryType::G3D);
 	int elementsNum = m_mesh->getElementsNumber();
 	if (elementsNum > 0) {
 		for (int i = 0; i < elementsNum; i++) {
@@ -356,7 +356,7 @@ void CFemLocalLinear3D::assembleKMatrix() {
 										cc = this->getVolume(i, 0)/20;
 								}
 								for (int l = 0; l < gr->m_intpoints; l++) {
-									kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
+									kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l])) * gr->m_wi[l];
 								}
 								if (l_row < n - 1)
 									kk = kk/m_pr->getRe();
@@ -364,11 +364,11 @@ void CFemLocalLinear3D::assembleKMatrix() {
 							else {
 								for (int l = 0; l < gr->m_intpoints; l++) {
 									if ((3 == l_col) && (0 == l_row))
-										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 									if ((3 == l_col) && (1 == l_row))
-										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 									if ((3 == l_col) && (2 == l_row))
-										kk = getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
+										kk += getVolume(i, 0) * (getKK(g_col, g_row, l_col, l_row, i, gr->m_p[l]) * this->getN(g_row, gr->m_p[l]) * gr->m_wi[l]);
 								}
 								cc = 0;
 							}
@@ -487,6 +487,7 @@ void CFemLocalLinear3D::perform(const int timesteps) {
 	int count = m_mesh->getPointsNumber();
 
 	this->assembleKMatrix();
+
 	//printMatrix2File("k_matrix.txt", m_K, m_F, count * n);
 	dump2binfile(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	for (int step = 1; step < timesteps; step++) {
