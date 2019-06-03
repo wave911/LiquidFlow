@@ -49,20 +49,38 @@ int CSalomeMesh::Init(MeshGeometryType meshType) {
     	}    	
     	if (idx > m_pointsNumber ) {
     		if (meshType == MeshGeometryType::G3D) {
-		    	if (tokens[1].find("220", 0) != std::string::npos) {
+//		    	if ((tokens[1].find("20", 0) != std::string::npos) ||
+//		    			(tokens[1].find("206", 0) != std::string::npos) ){
+//		    		addPoints(tokens, m_borderElements);
+//		    	}
+//		    	if ((tokens[1].find("30",0) != std::string::npos) ||
+//		    			(tokens[1].find("310",0) != std::string::npos)) {
+//		    		addPoints(tokens, m_mesh);
+//		    	}
+		    	if ((tokens[1].find(MeshElementsType::Salome::Tetrahedron::sLin2D, 0) != std::string::npos) ||
+		    			(tokens[1].find(MeshElementsType::Salome::Tetrahedron::sQuad2D, 0) != std::string::npos) ){
 		    		addPoints(tokens, m_borderElements);
 		    	}
-		    	if (tokens[1].find("30",0) != std::string::npos) {
+		    	if ((tokens[1].find(MeshElementsType::Salome::Tetrahedron::sLin3D, 0) != std::string::npos) ||
+		    			(tokens[1].find(MeshElementsType::Salome::Tetrahedron::sQuad3D,0) != std::string::npos)) {
 		    		addPoints(tokens, m_mesh);
-		    	}    	
+		    	}
 	    	}
     		if (meshType == MeshGeometryType::G2D) {
-		    	if (tokens[1].find("10", 0) != std::string::npos) {
+//		    	if (tokens[1].find("10", 0) != std::string::npos) {
+//		    		addPoints(tokens, m_borderElements);
+//		    	}
+//		    	if (tokens[1].find("20",0) != std::string::npos) {
+//		    		addPoints(tokens, m_mesh);
+//		    	}
+		    	if ((tokens[1].find(MeshElementsType::Salome::Tetrahedron::sLin1D, 0) != std::string::npos) ||
+		    			(tokens[1].find(MeshElementsType::Salome::Tetrahedron::sQuad1D, 0) != std::string::npos) ){
 		    		addPoints(tokens, m_borderElements);
 		    	}
-		    	if (tokens[1].find("20",0) != std::string::npos) {
+		    	if ((tokens[1].find(MeshElementsType::Salome::Tetrahedron::sLin2D, 0) != std::string::npos) ||
+		    			(tokens[1].find(MeshElementsType::Salome::Tetrahedron::sQuad2D,0) != std::string::npos)) {
 		    		addPoints(tokens, m_mesh);
-		    	}    	
+		    	}
 	    	}	    	
     	}
     }
