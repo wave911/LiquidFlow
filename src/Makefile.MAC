@@ -1,4 +1,4 @@
-SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp Problem.cpp FemLocalLinear2D.cpp FemLocalQuad2D.cpp FemLocalLinear3D.cpp
+SRCS = Common.cpp Mesh.cpp Fem.cpp LiquidFlow.cpp Problem.cpp FemLocalLinear2D.cpp FemLocalQuad2D.cpp FemLocalLinear3D.cpp FemLocalQuad3D.cpp
 
 RM = rm -f
 CC = clang++

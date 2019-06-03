@@ -29,7 +29,7 @@ real_t CProblem::setTau(const real_t t) {
 
 CProblem2DCircle::CProblem2DCircle(CMesh *mesh) : CProblem() {
 	m_mesh = mesh;
-	m_U = NULL;
+	m_U = nullptr;
 }
 
 CProblem2DCircle::~CProblem2DCircle() {
@@ -76,7 +76,7 @@ real_t CProblem2DCircle::getBorderCondition(const int idx, const int dim, const 
 		case 1:
 			return p.m_x;
 		case 2:
-			return -0.5 * (p.m_x * p.m_x + p.m_y * p.m_y);
+			return -0.5 * (1 - (p.m_x * p.m_x + p.m_y * p.m_y));
 		default:
 			return 0;
 	}
