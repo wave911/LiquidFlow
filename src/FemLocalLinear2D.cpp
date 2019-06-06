@@ -304,9 +304,9 @@ void CFemLocalLinear2D::assembleRightVector(const int timestep) {
 			real_t U2 = m_pr->getU(element[j], 1);
 			//integration over RHS
 			for (int l = 0; l < gr->m_intpoints; l++) {
-				m_F[element[j] * n + 0] += getSquare(i) * ( getFF(element[j], 0, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
-				m_F[element[j] * n + 1] += getSquare(i) * ( getFF(element[j], 1, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
-				m_F[element[j] * n + 2] += getSquare(i) * ( getFF(element[j], 2, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
+				m_F[element[j] * n + 0] -= getSquare(i) * ( getFF(element[j], 0, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 1] -= getSquare(i) * ( getFF(element[j], 1, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 2] -= getSquare(i) * ( getFF(element[j], 2, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
 			}
 
 			m_U_temp[element[j] * n + 0] = m_pr->getU(element[j], 0);
@@ -378,12 +378,16 @@ void CFemLocalLinear2D::perform(const int timesteps) {
 	 	memset(m_F, 0, count * n * sizeof(real_t));
 	 	binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
 	}
+	vector<real_t> error_x = vector<real_t>();
+	vector<real_t> error_y = vector<real_t>();
+	vector<real_t> error_p = vector<real_t>();
 	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
-	//for (int i = 0; i < m_mesh->getElementsNumber(); i++) {
-		//cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, 0) << " " << m_F[i * n + 0] << endl;
-		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, 0 ) << " " << m_F[i * n + 2] <<endl;
-		//cout << abs(abs(m_pr->getU(i, 2)) - abs(m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau())) )<<endl;
-		//out << "points " << m_mesh->getElementByIndex(i)[0] << " " << m_mesh->getElementByIndex(i)[1] << " " << m_mesh->getElementByIndex(i)[2] << endl;
+		error_x.push_back( abs(m_pr->getU(i, 0) - m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau())) );
+		error_y.push_back( abs(m_pr->getU(i, 1) - m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau())) );
+		error_p.push_back( abs(m_pr->getU(i, 2) - m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau())) );
 	}
+	cout << "error x max " << *max_element(error_x.begin(), error_x.end()) << endl;
+	cout << "error y max " << *max_element(error_y.begin(), error_y.end()) << endl;
+	cout << "error p max " << *max_element(error_p.begin(), error_p.end()) << endl;
 }

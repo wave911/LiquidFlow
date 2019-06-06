@@ -291,7 +291,6 @@ real_t CFemLocalLinear3D::getdUdX(const int element_idx, const int dim, std::vec
 		real_t U = m_pr->getU(element[i], dim);
 		res += U * getdNdX(i, element_idx, ksi);
 	}
-
 	return res;
 }
 
@@ -423,10 +422,10 @@ void CFemLocalLinear3D::assembleRightVector(const int timestep) {
 			real_t U3 = m_pr->getU(element[j], 2);
 			//integration over RHS
 			for (int l = 0; l < gr->m_intpoints; l++) {
-				m_F[element[j] * n + 0] += getVolume(i, 0) * ( getFF(element[j], 0, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
-				m_F[element[j] * n + 1] += getVolume(i, 0) * ( getFF(element[j], 1, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
-				m_F[element[j] * n + 2] += getVolume(i, 0) * ( getFF(element[j], 2, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
-				m_F[element[j] * n + 3] += getVolume(i, 0) * ( getFF(element[j], 3, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
+				m_F[element[j] * n + 0] -= getVolume(i, 0) * ( getFF(element[j], 0, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 1] -= getVolume(i, 0) * ( getFF(element[j], 1, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l]);
+				m_F[element[j] * n + 2] -= getVolume(i, 0) * ( getFF(element[j], 2, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
+				m_F[element[j] * n + 3] -= getVolume(i, 0) * ( getFF(element[j], 3, i, gr->m_p[l]) * getN(j, gr->m_p[l]) * gr->m_wi[l] );
 			}
 
 			m_U_temp[element[j] * n + 0] = U1;
@@ -437,9 +436,9 @@ void CFemLocalLinear3D::assembleRightVector(const int timestep) {
 	}
 
 	char *ch = "N";
-	int m_m = m_mesh->getPointsNumber() * n,
-		m_n = m_mesh->getPointsNumber() * n,
-		lda = m_mesh->getPointsNumber() * n,
+	int m_m = ptnumber * n,
+		m_n = ptnumber * n,
+		lda = ptnumber * n,
 		incx = 1,
 		incy = 1;
 	real_t tau = 1/m_pr->getTau(),
@@ -498,18 +497,14 @@ void CFemLocalLinear3D::perform(const int timesteps) {
 		m_pr->setU(m_F);
 		memset(m_F, 0, count * n * sizeof(real_t));
 		binfile2data(m_K, count * n * count * n, K_MATRIX_FILENAME);
+		cout << "step " << step << " / " << timesteps << " is done" << endl;
 	}
 	cout << "number of points = " << count << endl;
 	for (int i = 0; i < count; i++) {
-//		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
-//		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
-//		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
-//		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
-
-		cout << i * n + 0 << "=" << m_pr->getU(i, 0) - m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
-		cout << i * n + 1 << "=" << m_pr->getU(i, 1) - m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
-		cout << i * n + 2 << "=" << m_pr->getU(i, 2) - m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
-		cout << i * n + 3 << "=" << m_pr->getU(i, 3) - m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 0 << "=" << m_pr->getU(i, 0) << " " << m_pr->getBorderCondition(i, 0, (timesteps - 1) * m_pr->getTau()) << endl;
+		cout << i * n + 1 << "=" << m_pr->getU(i, 1) << " " << m_pr->getBorderCondition(i, 1, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 2 << "=" << m_pr->getU(i, 2) << " " << m_pr->getBorderCondition(i, 2, (timesteps - 1) * m_pr->getTau()) <<endl;
+		cout << i * n + 3 << "=" << m_pr->getU(i, 3) << " " << m_pr->getBorderCondition(i, 3, (timesteps - 1) * m_pr->getTau()) <<endl;
 	}
 }
 
