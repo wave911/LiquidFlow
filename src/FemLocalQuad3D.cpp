@@ -6,8 +6,9 @@
 
 using namespace std;
 
-CFemLocalQuad3D::CFemLocalQuad3D(CMesh *mesh) : CFemLocalLinear3D(mesh) {
+CFemLocalQuad3D::CFemLocalQuad3D(CMesh *mesh, const int equations_number, const MeshGeometryType mgt) : CFemLocalLinear3D(mesh, equations_number, mgt) {
 	m_mesh = mesh;
+	m_mesh_geometry_type = mgt;
 }
 
 CFemLocalQuad3D::~CFemLocalQuad3D() {
@@ -275,7 +276,6 @@ real_t CFemLocalQuad3D::getdNdZ(const int idxN, const int element, std::vector<r
 			return 0;
 	}
 }
-
 
 std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int element, std::vector<real_t> ksi) {
 	vector<int> points = m_mesh->getElementByIndex(element);
@@ -592,8 +592,6 @@ std::vector<real_t> CFemLocalQuad3D::getdKsidXYZ(const int dim, const int elemen
 	for (int i = n_start; i < n_end; i++) {
 		dKsi.push_back(c[i]);
 	}
-
-
 
 	delete [] m1;
 	delete [] m2;

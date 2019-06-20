@@ -6,13 +6,14 @@
 
 using namespace std;
 
-CFemLocalQuad2D::CFemLocalQuad2D(CMesh *mesh) : CFemLocalLinear2D(mesh) {
+CFemLocalQuad2D::CFemLocalQuad2D(CMesh *mesh, const int equations_number, const MeshGeometryType mgt) : CFemLocalLinear2D(mesh, equations_number, mgt) {
 	m_mesh = mesh;
-	m_K = nullptr;
-	m_C = nullptr;
-	m_F = nullptr;
-	m_U_temp = nullptr;
-	m_pr = nullptr;
+	m_mesh_geometry_type = mgt;
+//	m_K = nullptr;
+//	m_C = nullptr;
+//	m_F = nullptr;
+//	m_U_temp = nullptr;
+//	m_pr = nullptr;
 }
 
 CFemLocalQuad2D::~CFemLocalQuad2D() {
@@ -36,7 +37,7 @@ std::vector<real_t> CFemLocalQuad2D::getLocalCoordinates(const int element,
 	CPoint3D p2 = m_mesh->getPointByIndex(points[1]);
 	CPoint3D p3 = m_mesh->getPointByIndex(points[2]);
 
-	real_t square = getSquare(element);
+	real_t square = getVolume(element);
 	matrix[0] = p2.m_x * p3.m_y - p3.m_x * p2.m_y;
 	matrix[1] = p3.m_x * p1.m_y - p1.m_x * p3.m_y;
 	matrix[2] = p1.m_x * p2.m_y - p2.m_x * p1.m_y;

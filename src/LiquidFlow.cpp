@@ -72,24 +72,27 @@ int main()
 	mesh->Init((MeshGeometryType)Dimension);
 	CFem *fem = nullptr;
 	CProblem *pr = NULL;
+	int equations_number = 0;
 
 	if (Dimension == (int)MeshGeometryType::G2D) {
+		equations_number = 3;
 		if (mesh->getPointsNumberPerElement() == 3) {
-			fem = new CFemLocalLinear2D(mesh);
+			fem = new CFemLocalLinear2D(mesh, equations_number, MeshGeometryType::G2D);
 			cout << "Linear" << endl;
 		}
 		if (mesh->getPointsNumberPerElement() == 6) {
-			fem = new CFemLocalQuad2D(mesh);
+			fem = new CFemLocalQuad2D(mesh, equations_number, MeshGeometryType::G2D);
 			cout << "Quadratic" << endl;
 		}
 	}
 	else {
+		equations_number = 4;
 		if (mesh->getPointsNumberPerElement() == 4) {
-			fem = new CFemLocalLinear3D(mesh);
+			fem = new CFemLocalLinear3D(mesh, equations_number, MeshGeometryType::G3D);
 			cout << "Linear" << endl;
 		}
 		if (mesh->getPointsNumberPerElement() == 10) {
-			fem = new CFemLocalQuad3D(mesh);
+			fem = new CFemLocalQuad3D(mesh, equations_number, MeshGeometryType::G3D);
 			cout << "Quadratic" << endl;
 		}
 	}
